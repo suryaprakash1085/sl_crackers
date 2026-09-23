@@ -1,0 +1,39 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint",
+    "init:db": "node src/scripts/init-db.js",
+    "migrate:price80": "node src/scripts/add-product-price-80.js",
+    "migrate:catalog-indexes": "node src/scripts/add-catalog-indexes.js",
+    "migrate:company-upload-fields": "node src/scripts/add-company-upload-fields.js"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.8",
+    "@mui/material": "^7.3.8",
+    "bcryptjs": "^3.0.3",
+    "html-to-image": "^1.11.13",
+    "html2pdf.js": "0.10.1",
+    "mysql2": "^3.17.1",
+    "next": "16.1.6",
+    "nodemailer": "^8.0.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "scroll-carousel": "^1.2.7",
+    "sharp": "^0.34.5",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4"
+  }
+}

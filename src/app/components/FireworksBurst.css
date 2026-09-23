@@ -1,0 +1,198 @@
+.firework-burst {
+  position: fixed;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.firework-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: burst-out 1.2s ease-out forwards;
+  transform-origin: center center;
+}
+
+.firework-particle:nth-child(1) {
+  --color: #FFD700;
+  --angle: 0deg;
+  background-color: #FFD700;
+}
+
+.firework-particle:nth-child(2) {
+  --color: #FFA500;
+  --angle: 15deg;
+  background-color: #FFA500;
+}
+
+.firework-particle:nth-child(3) {
+  --color: #FF6B35;
+  --angle: 30deg;
+  background-color: #FF6B35;
+}
+
+.firework-particle:nth-child(4) {
+  --color: #FF85A1;
+  --angle: 45deg;
+  background-color: #FF85A1;
+}
+
+.firework-particle:nth-child(5) {
+  --color: #87CEEB;
+  --angle: 60deg;
+  background-color: #87CEEB;
+}
+
+.firework-particle:nth-child(6) {
+  --color: #FFC700;
+  --angle: 75deg;
+  background-color: #FFC700;
+}
+
+.firework-particle:nth-child(7) {
+  --color: #FF1493;
+  --angle: 90deg;
+  background-color: #FF1493;
+}
+
+.firework-particle:nth-child(8) {
+  --color: #00CED1;
+  --angle: 105deg;
+  background-color: #00CED1;
+}
+
+.firework-particle:nth-child(9) {
+  --color: #FFD700;
+  --angle: 120deg;
+  background-color: #FFD700;
+}
+
+.firework-particle:nth-child(10) {
+  --color: #FFA500;
+  --angle: 135deg;
+  background-color: #FFA500;
+}
+
+.firework-particle:nth-child(11) {
+  --color: #FF6B35;
+  --angle: 150deg;
+  background-color: #FF6B35;
+}
+
+.firework-particle:nth-child(12) {
+  --color: #FF85A1;
+  --angle: 165deg;
+  background-color: #FF85A1;
+}
+
+.firework-particle:nth-child(13) {
+  --color: #87CEEB;
+  --angle: 180deg;
+  background-color: #87CEEB;
+}
+
+.firework-particle:nth-child(14) {
+  --color: #FFC700;
+  --angle: 195deg;
+  background-color: #FFC700;
+}
+
+.firework-particle:nth-child(15) {
+  --color: #FF1493;
+  --angle: 210deg;
+  background-color: #FF1493;
+}
+
+.firework-particle:nth-child(16) {
+  --color: #00CED1;
+  --angle: 225deg;
+  background-color: #00CED1;
+}
+
+.firework-particle:nth-child(17) {
+  --color: #FFD700;
+  --angle: 240deg;
+  background-color: #FFD700;
+}
+
+.firework-particle:nth-child(18) {
+  --color: #FFA500;
+  --angle: 255deg;
+  background-color: #FFA500;
+}
+
+.firework-particle:nth-child(19) {
+  --color: #FF6B35;
+  --angle: 270deg;
+  background-color: #FF6B35;
+}
+
+.firework-particle:nth-child(20) {
+  --color: #FF85A1;
+  --angle: 285deg;
+  background-color: #FF85A1;
+}
+
+.firework-particle:nth-child(21) {
+  --color: #87CEEB;
+  --angle: 300deg;
+  background-color: #87CEEB;
+}
+
+.firework-particle:nth-child(22) {
+  --color: #FFC700;
+  --angle: 315deg;
+  background-color: #FFC700;
+}
+
+.firework-particle:nth-child(23) {
+  --color: #FF1493;
+  --angle: 330deg;
+  background-color: #FF1493;
+}
+
+.firework-particle:nth-child(24) {
+  --color: #00CED1;
+  --angle: 345deg;
+  background-color: #00CED1;
+}
+
+@keyframes burst-out {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+      calc(120px * cos(var(--angle))),
+      calc(120px * sin(var(--angle)))
+    )
+    scale(0);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .firework-particle {
+    width: 6px;
+    height: 6px;
+    animation: burst-out-mobile 1.2s ease-out forwards;
+  }
+
+  @keyframes burst-out-mobile {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(
+        calc(80px * cos(var(--angle))),
+        calc(80px * sin(var(--angle)))
+      )
+      scale(0);
+      opacity: 0;
+    }
+  }
+}
