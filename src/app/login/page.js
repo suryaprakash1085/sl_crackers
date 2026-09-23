@@ -106,9 +106,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <p className="text-center text-gray-400 text-sm mt-6">
-          Powered by Prasanna Kumar
-        </p>
+   
       </div>
     </div>
   );

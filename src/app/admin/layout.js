@@ -84,7 +84,7 @@ export default function AdminLayout({ children }) {
         <div className="bg-white shadow-sm border-b border-gray-200 p-4 md:p-6 flex items-center justify-between print:hidden">
           <h1 className="text-xl md:text-2xl font-bold text-gray-800">Admin Panel</h1>
           <div className="flex items-center gap-4">
-            <span className="hidden md:inline text-gray-600">Powered by Prasanna Kumar</span>
+            {/* <span className="hidden md:inline text-gray-600">Powered by Prasanna Kumar</span> */}
             <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
           </div>
         </div>

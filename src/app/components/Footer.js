@@ -62,7 +62,7 @@ export default function Footer() {
 
   const footerLinks = [
     { href: '/', label: 'Home' },
-    { href: '/price-list', label: 'Price List' },
+    { href: '/price-list', label: 'Product Price List' },
     { href: '/about-us', label: 'About Us' },
     { href: '/contact-us', label: 'Contact Us' },
   ];

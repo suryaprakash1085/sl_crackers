@@ -377,7 +377,7 @@ export default function OrdersPage() {
                             className="action-button"
                             title="Edit order status"
                           >
-                            ✎
+                            📋
                           </button>
                           <button
                             onClick={() => handleViewDetails(order.id)}

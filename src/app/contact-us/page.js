@@ -93,6 +93,7 @@ export default function ContactUs() {
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Contact Us</h1>
           <p className="mt-2 text-sm sm:text-base" style={{ color: colors.goldAccent }}>Get in touch with our team</p>
+              <p className="mt-2 text-sm sm:text-base" style={{ color: colors.goldAccent }}>9894663705, 8122523705</p>
         </div>
       </section>
 
