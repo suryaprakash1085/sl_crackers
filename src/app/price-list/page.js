@@ -286,7 +286,7 @@ export default function PriceList() {
       </section>
 
       <section className="price-list-order-info" aria-label="Ordering information">
-        <div className="price-list-minimum-order">🎉 <strong>MIN ORDER: RS. 3000 (TN) | RS 5000 (Other States)</strong><br /><b>⚡ FLAT 80% SPECIAL DISCOUNT ⚡</b></div>
+        <div className="price-list-minimum-order">🎉 <strong>MIN ORDER: RS. 3000 (TN) | RS 5000 (Other States)</strong><br /><b>⚡ FLAT 75% SPECIAL DISCOUNT ⚡</b></div>
         <div className="price-list-steps">
           <h2>✨ SIMPLE 3-STEP ORDERING PROCESS ✨</h2>
           <div className="price-list-steps__grid">
@@ -313,7 +313,7 @@ export default function PriceList() {
         ) : (
           displayedCategories.map((category, categoryIndex) => (
             <section className="price-list-category" id={categoryId(category.name)} key={category.name}>
-                <h2 className="price-list-category__title">{categoryIndex + 1}. {category.name} <span>(80% discount)</span></h2>
+                <h2 className="price-list-category__title">{categoryIndex + 1}. {category.name} <span>(75% discount)</span></h2>
               <div className="price-list-table-header" aria-hidden="true">
                 <span>Image</span><span>Product</span><span>Unit</span><span>Price</span><span>Discount</span><span>Quantity</span><span>Total</span>
               </div>
@@ -340,7 +340,7 @@ export default function PriceList() {
                           decoding="async"
                           onError={handleImageError}
                         />
-                        <span className="price-list-product__discount">80%</span>
+                        <span className="price-list-product__discount">75%</span>
                       </button>
 
                       <div className="price-list-product__details">

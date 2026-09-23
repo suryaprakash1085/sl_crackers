@@ -14,7 +14,7 @@ export async function GET() {
       ID: product.id,
       Name: product.name,
       Price: product.price,
-      '80%price': product.price_80 ?? Number(product.price) * 0.8,
+      '75%price': product.price_80 ?? Number(product.price) * 0.8,
       Description: product.description || '',
       Category: product.category || '',
       Quantity: product.quantity || 0
@@ -29,7 +29,7 @@ export async function GET() {
       { wch: 8 },  // ID
       { wch: 25 }, // Name
       { wch: 12 }, // Price
-      { wch: 12 }, // 80% Price
+      { wch: 12 }, // 75% Price
       { wch: 30 }, // Description
       { wch: 15 }, // Category
       { wch: 10 }  // Quantity

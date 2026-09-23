@@ -22,7 +22,7 @@ async function addProductPrice80() {
     await connection.execute(
       'UPDATE products SET price_80 = ROUND(price * 0.8, 2) WHERE price_80 IS NULL'
     );
-    console.log('Backfilled missing 80% prices');
+    console.log('Backfilled missing 75% prices');
   } finally {
     await connection.end();
   }

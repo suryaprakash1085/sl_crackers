@@ -43,7 +43,7 @@ export async function POST(request) {
     );
     const [companyInfoRows] = await connection.execute('SELECT * FROM company_info LIMIT 1');
     const companyInfo = companyInfoRows[0] || {
-      company_name: 'Paradise Crackers',
+      company_name: 'Sivakasi Mart Traders',
       email: SELLER_EMAIL,
       phone_number: '+91-XXXXXXXXXX',
     };

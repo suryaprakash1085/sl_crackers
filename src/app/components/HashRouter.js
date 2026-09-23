@@ -40,7 +40,7 @@ export default function HashRouter({ children }) {
   const route = hash.replace('#', '') || '/';
 
   useEffect(() => {
-    document.title = 'Paradise Crackers';
+    document.title = 'Sivakasi Mart Traders';
   }, [route]);
 
   // Admin routes - check if user is authorized

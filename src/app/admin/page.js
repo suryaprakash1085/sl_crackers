@@ -31,7 +31,7 @@ export default function AdminDashboard() {
     title: "CRACKERS INDIA",
     heading: "Client Says About Us",
     quote:
-      "We have been sourcing crackers from Paradise Crackers for the past 5 years. The quality is consistently excellent, and their customer service is outstanding. They have helped us grow our business significantly.",
+      "We have been sourcing crackers from Sivakasi Mart Traders for the past 5 years. The quality is consistently excellent, and their customer service is outstanding. They have helped us grow our business significantly.",
     attribution: "Satisfied Customer",
   });
   const [blogPosts, setBlogPosts] = useState("");

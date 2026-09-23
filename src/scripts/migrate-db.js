@@ -72,7 +72,7 @@ async function migrateDatabase() {
         INSERT INTO company_info (company_name, phone_number, gst_number, email)
         VALUES (?, ?, ?, ?)
       `;
-      await connection.execute(defaultCompanyQuery, ['Paradise Crackers', '', '', '']);
+      await connection.execute(defaultCompanyQuery, ['Sivakasi Mart Traders', '', '', '']);
       console.log('✓ Default company info inserted');
     }
 

@@ -295,7 +295,7 @@ export default function Home() {
   const getCategoryImage = (name) => categoryImageByName.get(name.trim().toUpperCase());
 
   const heroImage = carouselImages[currentImage]?.image_url || carouselImages[currentImage]?.image || fallbackImage;
-  const companyName = companyInfo.company_name || 'Paradise Crackers';
+  const companyName = companyInfo.company_name || 'Sivakasi Mart Traders';
 
   return (
     <main className="paradise-home">
@@ -334,7 +334,7 @@ export default function Home() {
               <article className="arrival-card" key={`${product.id || product.name}-${index}`} onClick={() => router.push('/price-list')}>
                 <div className="arrival-card__image">
                   {isProductImage(product.image_thumbnail || product.image) ? <img src={product.image_thumbnail || product.image} alt={product.name} loading="lazy" decoding="async" onError={handleImageError} /> : <span className="arrival-card__fallback">{categoryEmoji[0]}</span>}
-                  <span className="arrival-card__discount">80% OFF</span>
+                  <span className="arrival-card__discount">75% OFF</span>
                 </div>
                 <div className="arrival-card__body">
                   <h3>{product.name}</h3><strong>{formatPrice(getProductSalePrice(product))}</strong>
@@ -387,7 +387,7 @@ export default function Home() {
       </section>
 
       <section className="paradise-about">
-        <div className="paradise-section-heading paradise-about__heading"><span>SIVAKASI&apos;S PREMIER FIREWORKS STORE</span><h2>ABOUT <strong>PARADISE CRACKERS</strong></h2><i aria-hidden="true" /><p>Spreading light, joy &amp; festive sparkles across India for over two decades</p></div>
+        <div className="paradise-section-heading paradise-about__heading"><span>SIVAKASI&apos;S PREMIER FIREWORKS STORE</span><h2>ABOUT <strong>Sivakasi Mart Traders</strong></h2><i aria-hidden="true" /><p>Spreading light, joy &amp; festive sparkles across India for over two decades</p></div>
         <div className="paradise-about__layout">
           <div className="paradise-about__banner" style={{ backgroundImage: `url(${aboutImage || heroImage})` }}><strong>{companyName}</strong><span>Bringing celebrations to life</span></div>
           <div className="paradise-about__copy"><h3>We Are The Leading Supplier Of Superior Fireworks &amp; Fancy Crackers</h3><p>With a carefully selected range, dependable service and quality products, {companyName} helps families light up every special occasion.</p><div className="about-points"><span>✓ Direct Factory Rates</span><span>✓ Green &amp; Safe Crackers</span><span>✓ Pan-India Dispatch</span></div></div>

@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Paradise Crackers",
+  title: "Sivakasi Mart Traders",
   description: "Quality crackers and fireworks supplier",
 };
 

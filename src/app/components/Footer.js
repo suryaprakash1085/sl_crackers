@@ -10,7 +10,7 @@ import styles from './Footer.module.css';
 import { getPublicJson } from '@/lib/publicJson';
 
 const defaultCompanyInfo = {
-  company_name: 'Paradise Crackers',
+  company_name: 'Sivakasi Mart Traders',
   logo: null,
   phone_number: '',
   email: '',
@@ -51,7 +51,7 @@ export default function Footer() {
         ]);
 
         document.documentElement.style.setProperty('--site-footer-color', settings.navbarColor || '#1d4f4f');
-        setCompanyInfo({ ...defaultCompanyInfo, ...companyData, company_name: 'Paradise Crackers' });
+        setCompanyInfo({ ...defaultCompanyInfo, ...companyData, company_name: 'Sivakasi Mart Traders' });
       } catch (error) {
         console.error('Error fetching footer details:', error);
       }
@@ -84,8 +84,8 @@ export default function Footer() {
               </div>
             )}
           </div>
-          <p>As per 2018 supreme court order, online sale of firecrackers are not permitted! We give more value to our customers and at the same time, we should respect jurisdiction. Please submit your queries and enjoy your Diwali with Paradise Crackers. Our company follows 100% legal and statutory compliances.</p>
-          <p className={styles.footerCopyright}>© 2026 Paradise Crackers. All Rights Reserved.</p>
+          <p>As per 2018 supreme court order, online sale of firecrackers are not permitted! We give more value to our customers and at the same time, we should respect jurisdiction. Please submit your queries and enjoy your Diwali with Sivakasi Mart Traders. Our company follows 100% legal and statutory compliances.</p>
+          <p className={styles.footerCopyright}>© 2026 Sivakasi Mart Traders. All Rights Reserved.</p>
         </div>
 
         <div className={styles.footerContacts}>

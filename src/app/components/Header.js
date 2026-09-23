@@ -27,7 +27,7 @@ export default function Header() {
   const cartItemsCount = getCartItemCount();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
-    company_name: 'Paradise Crackers',
+    company_name: 'Sivakasi Mart Traders',
     logo: null,
     price_list_pdf: null,
     phone_number: '',
@@ -49,7 +49,7 @@ export default function Header() {
     try {
       const data = await getPublicJson('/api/company-info');
       setCompanyInfo({
-          company_name: data.company_name || 'Paradise Crackers',
+          company_name: data.company_name || 'Sivakasi Mart Traders',
           logo: data.logo,
           price_list_pdf: data.price_list_pdf || null,
           phone_number: data.phone_number || '',
@@ -100,7 +100,7 @@ export default function Header() {
     <header className="paradise-navbar text-white sticky top-0 z-50 shadow-md" style={{ backgroundColor: navbarColor }}>
       <div className="paradise-navbar__inner">
         {/* Logo */}
-        <a href="/" className="paradise-navbar__brand" aria-label="Go to Paradise Crackers home">
+        <a href="/" className="paradise-navbar__brand" aria-label="Go to Sivakasi Mart Traders home">
           {!loadingCompanyInfo && companyInfo.logo ? (
             <img
               src={companyInfo.logo}

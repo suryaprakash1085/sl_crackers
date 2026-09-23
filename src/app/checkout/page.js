@@ -64,7 +64,7 @@ export default function CheckoutPage() {
   });
 
   const [companyInfo, setCompanyInfo] = useState({
-    company_name: 'Paradise Crackers',
+    company_name: 'Sivakasi Mart Traders',
     address: '',
     email: '',
     phone_number: '',

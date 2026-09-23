@@ -54,7 +54,7 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
     upi: { name: 'xxxx', id: 'cnjncdjdk' },
   };
   const companyInfo = orderData.companyInfo || {
-    company_name: 'Paradise Crackers',
+    company_name: 'Sivakasi Mart Traders',
     address: '',
     email: '',
     phone_number: '',

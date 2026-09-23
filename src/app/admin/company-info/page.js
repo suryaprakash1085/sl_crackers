@@ -59,7 +59,7 @@ export default function CompanyInfoPage() {
   }, []);
 
   useEffect(() => {
-    document.title = 'Paradise Crackers';
+    document.title = 'Sivakasi Mart Traders';
   }, []);
 
   useEffect(() => {
@@ -271,7 +271,7 @@ export default function CompanyInfoPage() {
               name="company_name"
               value={formData.company_name}
               onChange={handleInputChange}
-              placeholder="e.g., Paradise Crackers"
+              placeholder="e.g., Sivakasi Mart Traders"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               required
             />

@@ -40,7 +40,7 @@ export async function POST(request) {
         const row = data[i];
         const name = row.Name || row.name;
         const price = parseFloat(row.Price || row.price);
-        const price80Value = row['80%price'] ?? row['80% Price'] ?? row['Price 80%'] ?? row.Price80 ?? row.price80 ?? row.price_80;
+        const price80Value = row['75%price'] ?? row['75% Price'] ?? row['Price 75%'] ?? row.Price80 ?? row.price80 ?? row.price_80;
         const price80 = price80Value === undefined || price80Value === ''
           ? price * 0.8
           : parseFloat(price80Value);

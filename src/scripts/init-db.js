@@ -185,7 +185,7 @@ async function initializeDatabase() {
       };
       await connection.execute(
         'INSERT INTO company_info (company_name, phone_number, gst_number, email, address, business_hours) VALUES (?, ?, ?, ?, ?, ?)',
-        ['Paradise Crackers', '+91 XXXXX XXXXX', '', 'support@paradisecrackers.com', 'Sivakasi, Tamil Nadu, India', JSON.stringify(defaultBusinessHours)]
+        ['Sivakasi Mart Traders', '+91 XXXXX XXXXX', '', 'support@paradisecrackers.com', 'Sivakasi, Tamil Nadu, India', JSON.stringify(defaultBusinessHours)]
       );
       console.log('✓ Default company info inserted');
     }

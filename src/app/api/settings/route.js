@@ -50,7 +50,7 @@ export async function GET(request) {
       testimonial: {
         title: 'CRACKERS INDIA',
         heading: 'Client Says About Us',
-        quote: 'We have been sourcing crackers from Paradise Crackers for the past 5 years. The quality is consistently excellent, and their customer service is outstanding. They have helped us grow our business significantly.',
+        quote: 'We have been sourcing crackers from Sivakasi Mart Traders for the past 5 years. The quality is consistently excellent, and their customer service is outstanding. They have helped us grow our business significantly.',
         attribution: 'Satisfied Customer'
       },
       brands: ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'],
@@ -139,7 +139,7 @@ export async function GET(request) {
       } else if (setting.setting_key === 'testimonial_data') {
         try {
           result.testimonial = JSON.parse(setting.setting_value);
-          result.testimonial.quote = result.testimonial.quote.replace(/pk crackers/gi, 'Paradise Crackers');
+          result.testimonial.quote = result.testimonial.quote.replace(/pk crackers/gi, 'Sivakasi Mart Traders');
         } catch (e) {
           console.error('Error parsing testimonial JSON:', e);
         }
