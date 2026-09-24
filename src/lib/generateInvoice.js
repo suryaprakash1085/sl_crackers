@@ -54,7 +54,7 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
     upi: { name: 'xxxx', id: 'cnjncdjdk' },
   };
   const companyInfo = orderData.companyInfo || {
-    company_name: 'Sivakasi Mart Traders',
+    company_name: 'Paradise Crackers',
     address: '',
     email: '',
     phone_number: '',
@@ -96,20 +96,17 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
     const amount = (salePrice * item.quantity).toFixed(2);
 
     return `
-      <tr>
-        <td style="text-align: center; color: #7b8794;">${index + 1}</td>
-        <td style="font-weight: 600;">${item.name}</td>
-        <td style="text-align: center; color: #7b8794;">₹ ${originalPrice.toFixed(0)}</td>
-        <td style="text-align: center; color: #c0392b;">${discountPercent}%</td>
-        <td style="text-align: center; color: #7b8794;">₹ ${discountAmount.toFixed(0)}</td>
-        <td style="text-align: center;">${item.quantity}</td>
-        <td style="text-align: right; font-weight: 600;">₹ ${amount}</td>
+      <tr style="border: 1px solid #000;">
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${index + 1}</td>
+        <td style="border: 1px solid #000; padding: 8px;">${item.name}</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${originalPrice.toFixed(0)}</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${discountPercent}%</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${discountAmount.toFixed(0)}</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.quantity}</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: right;">₹ ${amount}</td>
       </tr>
     `;
   }).join('');
-
-  const brandColor = '#1e3a5f';
-  const brandColorLight = '#eef3f8';
 
   const invoiceHTML = `
     <!DOCTYPE html>
@@ -129,144 +126,102 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           height: 100%;
         }
         body {
-          font-family: 'Helvetica Neue', Arial, sans-serif;
+          font-family: Arial, sans-serif;
           padding: 0;
-          background: #f2f4f7;
+          background: white;
         }
         .invoice-container {
-          border: 1px solid #e2e6ea;
-          border-radius: 10px;
-          overflow: hidden;
+          border: 2px solid #000;
           width: 210mm;
           max-width: 100%;
           height: auto;
           margin: 0 auto;
           background: white;
-          color: #1f2933;
+          color: black;
           font-size: 11px;
           line-height: 1.4;
         }
         .header {
-          background: ${brandColor};
-          color: #ffffff;
-          padding: 18px 24px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+          border-bottom: 1px solid #000;
+          padding: 8px;
+          text-align: center;
         }
-        .header-brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .logo-box {
-          width: 46px;
-          height: 46px;
-          flex: 0 0 46px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #ffffff;
-          border-radius: 8px;
-        }
-        .logo-img {
-          display: block;
-          max-width: 40px;
-          max-height: 40px;
-          object-fit: contain;
-        }
-        .header-brand h1 {
-          font-size: 15px;
-          font-weight: 700;
-          letter-spacing: 0.3px;
-        }
-        .header-brand span {
-          display: block;
-          font-size: 9px;
-          opacity: 0.85;
-          margin-top: 2px;
-        }
-        .header-title {
-          text-align: right;
-        }
-        .header-title h2 {
-          font-size: 22px;
-          font-weight: 800;
-          letter-spacing: 2px;
-        }
-        .header-title span {
-          display: block;
-          font-size: 9px;
-          opacity: 0.85;
-          margin-top: 2px;
+        .header h1 {
+          font-size: 16px;
+          font-weight: bold;
+          margin: 0;
         }
         .company-section {
           display: grid;
           grid-template-columns: 2fr 1fr;
-          border-bottom: 1px solid #e2e6ea;
-          min-height: 60px;
+          border-bottom: 1px solid #000;
+          min-height: 70px;
         }
         .company-details {
           display: flex;
           align-items: center;
           gap: 10px;
-          padding: 12px 24px;
-          border-right: 1px solid #e2e6ea;
+          padding: 8px;
+          border-right: 1px solid #000;
+        }
+        .logo-box {
+          width: 58px;
+          height: 58px;
+          flex: 0 0 58px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .logo-img {
+          display: block;
+          max-width: 58px;
+          max-height: 58px;
+          object-fit: contain;
         }
         .company-text {
           min-width: 0;
         }
+        .company-details h3 {
+          font-weight: bold;
+          margin: 0 0 3px 0;
+          font-size: 12px;
+        }
         .company-details p {
           font-size: 9px;
-          color: #52606d;
-          line-height: 1.3;
+          line-height: 1.2;
           margin: 1px 0;
         }
         .bill-info {
-          padding: 12px 24px;
+          padding: 8px;
           font-size: 10px;
         }
         .bill-info-row {
           display: flex;
-          justify-content: space-between;
-          margin-bottom: 5px;
+          margin-bottom: 6px;
           gap: 5px;
         }
         .bill-info-label {
-          font-weight: 600;
-          color: #7b8794;
-        }
-        .status-pill {
-          display: inline-block;
-          padding: 1px 8px;
-          border-radius: 10px;
-          background: #fdecea;
-          color: #c0392b;
-          font-weight: 700;
-          font-size: 9px;
+          font-weight: bold;
+          width: 60px;
         }
         .customer-section {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          border-bottom: 1px solid #e2e6ea;
-          min-height: 64px;
+          border-bottom: 1px solid #000;
+          min-height: 70px;
         }
         .customer-details {
-          padding: 12px 24px;
-          border-right: 1px solid #e2e6ea;
+          padding: 8px;
+          border-right: 1px solid #000;
           font-size: 10px;
         }
         .customer-details h3 {
-          font-weight: 700;
+          font-weight: bold;
           margin: 0 0 5px 0;
-          font-size: 9px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          color: ${brandColor};
+          font-size: 10px;
         }
         .customer-details p {
           font-size: 9px;
-          color: #52606d;
           line-height: 1.3;
           margin: 2px 0;
         }
@@ -274,47 +229,36 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           font-size: 12px;
           display: block;
           margin-bottom: 2px;
-          color: #1f2933;
         }
         .transporter-section {
-          padding: 12px 24px;
+          padding: 8px;
           display: flex;
           flex-direction: column;
           font-size: 10px;
         }
         .transporter-section h3 {
-          font-weight: 700;
+          font-weight: bold;
           margin: 5px 0;
-          font-size: 9px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          color: ${brandColor};
+          font-size: 10px;
         }
         .items-table {
           width: 100%;
           border-collapse: collapse;
           margin: 0;
-          table-layout: auto;
+          table-layout: fixed;
         }
         .items-table th, .items-table td {
-          padding: 9px 12px;
+          border: 1px solid #000;
+          padding: 8px 4px;
           vertical-align: middle;
-          white-space: nowrap;
+          word-wrap: break-word;
           font-size: 10px;
-          border-bottom: 1px solid #eef1f4;
         }
         .items-table th {
-          background: ${brandColor};
-          color: #ffffff;
-          font-weight: 600;
+          background: #f5f5f5;
+          font-weight: bold;
           text-align: center;
-          border-bottom: none;
-          font-size: 9px;
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-        }
-        .items-table tbody tr:nth-child(even) {
-          background: #f8fafc;
+          border: 2px solid #000;
         }
         .items-table tbody tr {
           page-break-inside: avoid;
@@ -323,77 +267,59 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           display: table-header-group;
         }
         .total-row {
-          font-weight: 700;
-          background: ${brandColorLight};
+          font-weight: bold;
+          background: #fff;
         }
         .total-row td {
-          padding: 10px 12px;
-          border-bottom: none;
-          color: ${brandColor};
-        }
-        .amount-in-words {
-          padding: 10px 24px;
-          border-bottom: 1px solid #e2e6ea;
-          font-size: 10px;
-          font-style: italic;
-          color: #52606d;
-          min-height: 28px;
-          display: flex;
-          align-items: center;
+          padding: 8px 4px;
         }
         .summary-section {
-          padding: 10px 24px;
-          border-bottom: 1px solid #e2e6ea;
+          padding: 8px;
+          border-bottom: 1px solid #000;
           font-size: 10px;
-          display: flex;
-          justify-content: flex-end;
         }
         .summary-row {
           display: flex;
           justify-content: space-between;
-          gap: 24px;
-          min-width: 220px;
+          margin-bottom: 8px;
+        }
+        .summary-row:last-child {
+          border-top: 1px solid #000;
+          padding-top: 10px;
+          margin-top: 10px;
         }
         .summary-label {
-          font-weight: 700;
+          font-weight: bold;
         }
         .summary-value {
           text-align: right;
-          font-weight: 700;
-          color: ${brandColor};
-          font-size: 13px;
         }
         .payment-section {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
-          gap: 12px;
-          border-bottom: 1px solid #e2e6ea;
+          border-bottom: 1px solid #000;
           min-height: 60px;
-          padding: 12px 24px;
           page-break-inside: avoid;
         }
         .payment-box {
           min-width: 0;
-          padding: 10px;
-          background: #f8fafc;
-          border: 1px solid #e2e6ea;
-          border-radius: 8px;
+          padding: 8px;
+          border-right: 1px solid #000;
           font-size: 10px;
           overflow-wrap: anywhere;
         }
+        .payment-box:last-child {
+          border-right: none;
+        }
         .payment-box h4 {
-          font-weight: 700;
-          margin: 0 0 4px 0;
-          font-size: 9px;
-          color: ${brandColor};
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
+          font-weight: bold;
+          margin: 0 0 3px 0;
+          font-size: 10px;
         }
         .payment-box p {
           margin: 3px 0;
           line-height: 1.3;
           font-size: 9px;
-          color: #52606d;
           overflow-wrap: anywhere;
         }
         .upi-qr-container {
@@ -406,31 +332,26 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           width: 50px;
           height: 50px;
           object-fit: contain;
-          border: 1px solid #e2e6ea;
-          border-radius: 4px;
+          border: 1px solid #000;
           padding: 2px;
-          background: #fff;
         }
         .declaration-section {
           display: grid;
           grid-template-columns: 1fr 1fr;
           min-height: 80px;
-          padding: 4px 24px 20px;
           page-break-inside: avoid;
         }
         .declaration {
-          padding: 12px 12px 12px 0;
+          padding: 8px;
+          border-right: 1px solid #000;
         }
         .declaration h3 {
-          font-weight: 700;
+          font-weight: bold;
           margin: 0 0 8px 0;
-          font-size: 9px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          color: ${brandColor};
+          font-size: 10px;
         }
         .signature-section {
-          padding: 12px;
+          padding: 8px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -438,9 +359,17 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
         }
         .signature-section p {
           font-size: 10px;
-          font-weight: 700;
+          font-weight: bold;
           margin: 0;
-          color: #1f2933;
+        }
+        .amount-in-words {
+          padding: 8px;
+          border-bottom: 1px solid #000;
+          font-size: 10px;
+          min-height: 30px;
+          display: flex;
+          align-items: center;
+          background-color: #f9f9f9;
         }
         .text-center { text-align: center; }
         .text-left { text-align: left; }
@@ -458,8 +387,6 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
             width: 100%;
             height: auto;
             background: white;
-            border-radius: 0;
-            border: none;
           }
           @page {
             size: A4;
@@ -473,23 +400,16 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
       <div class="invoice-container">
         <!-- Header -->
         <div class="header">
-          <div class="header-brand">
-            ${companyLogo ? `<div class="logo-box"><img src="${companyLogo}" alt="${companyInfo.company_name} logo" class="logo-img"></div>` : ''}
-            <div>
-              <h1>${companyInfo.company_name}</h1>
-              <span>${companyInfo.address || ''}</span>
-            </div>
-          </div>
-          <div class="header-title">
-            <h2>INVOICE</h2>
-            <span>#${invoiceNumber}</span>
-          </div>
+          <h1>BILL</h1>
         </div>
 
         <!-- Company and Bill Info Section -->
         <div class="company-section">
           <div class="company-details">
+            ${companyLogo ? `<div class="logo-box"><img src="${companyLogo}" alt="${companyInfo.company_name} logo" class="logo-img"></div>` : ''}
             <div class="company-text">
+              <h3>${companyInfo.company_name}</h3>
+              <p>${companyInfo.address}</p>
               <p>Gmail: ${companyInfo.email}</p>
               <p>Mob: ${companyInfo.phone_number}</p>
               ${companyInfo.gst_number ? `<p>GSTIN: ${companyInfo.gst_number}</p>` : ''}
@@ -497,16 +417,20 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           </div>
           <div class="bill-info">
             <div class="bill-info-row">
-              <span class="bill-info-label">Order No</span>
+              <span class="bill-info-label">Bill No:</span>
+              <span>${invoiceNumber}</span>
+            </div>
+            <div class="bill-info-row">
+              <span class="bill-info-label">Order No:</span>
               <span>${displayOrderNumber}</span>
             </div>
             <div class="bill-info-row">
-              <span class="bill-info-label">Date</span>
+              <span class="bill-info-label">Date:</span>
               <span>${currentDate}</span>
             </div>
             <div class="bill-info-row">
-              <span class="bill-info-label">Payment</span>
-              <span class="status-pill">Unpaid</span>
+              <span class="bill-info-label">Payment:</span>
+              <span>Unpaid</span>
             </div>
           </div>
         </div>
@@ -558,9 +482,9 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
 
         <!-- Summary -->
         <div class="summary-section">
-          <div class="summary-row">
-            <span class="summary-label">Total Amount</span>
-            <span class="summary-value">₹ ${totalAmount.toFixed(2)}</span>
+          <div class="summary-row" style="border-top: 1px solid #000; padding-top: 10px;">
+            <span class="summary-label"><strong>Total Amount</strong></span>
+            <span class="summary-value"><strong>₹ ${totalAmount.toFixed(2)}</strong></span>
           </div>
         </div>
 
@@ -579,10 +503,9 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           <div class="payment-box">
             <h4>UPI Name: ${payments.upi.name}</h4>
             <p>UPI ID: ${payments.upi.id}</p>
-            ${payments.upi.qrCode ? `
-            <div class="upi-qr-container">
-              <img src="${payments.upi.qrCode}" alt="UPI QR Code" class="upi-qr-image">
-            </div>` : ''}
+            <div style="margin-top: 20px; text-align: center;">
+              <div style="width: 60px; height: 60px; border: 1px solid #000; display: inline-block;"></div>
+            </div>
           </div>
         </div>
 

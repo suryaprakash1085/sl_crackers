@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 import InvoicePrint from '../components/InvoicePrint';
+import { openWhatsAppPopup, closeWhatsAppPopup, sendOrderWhatsApp } from '@/lib/whatsappNotify';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -12,6 +13,7 @@ export default function OrdersPage() {
   const [editMode, setEditMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchTimeout, setSearchTimeout] = useState(null);
+  const [companyName, setCompanyName] = useState('');
 
   // Inline editing state
   const [editingOrderId, setEditingOrderId] = useState(null);
@@ -30,6 +32,10 @@ export default function OrdersPage() {
   // Load orders from database
   useEffect(() => {
     fetchOrders();
+    fetch('/api/company-info?fields=company_name')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((info) => setCompanyName(info?.company_name || ''))
+      .catch(() => {});
   }, []);
 
   const handleViewDetails = (orderId) => {
@@ -215,6 +221,12 @@ export default function OrdersPage() {
   };
 
   const handleSaveStatusChange = async (orderId) => {
+    const order = orders.find((o) => o.id === orderId);
+    const statusChanged = !!order && editedStatus !== order.status;
+
+    // Must open synchronously (inside the click) so the browser doesn't block it.
+    const waPopup = statusChanged ? openWhatsAppPopup() : null;
+
     try {
       setSavingOrderId(orderId);
       const response = await fetch('/api/orders', {
@@ -230,15 +242,28 @@ export default function OrdersPage() {
       });
 
       if (response.ok) {
+        const newStatus = editedStatus;
         setEditingOrderId(null);
         setEditedStatus('');
         setEditedPaymentStatus('');
         fetchOrders(searchQuery);
+
+        if (statusChanged) {
+          sendOrderWhatsApp(waPopup, {
+            phone: order.phone,
+            name: order.customer_name,
+            orderId,
+            status: newStatus,
+            companyName,
+          });
+        }
       } else {
+        closeWhatsAppPopup(waPopup);
         const data = await response.json();
         alert(`Failed to save changes: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
+      closeWhatsAppPopup(waPopup);
       console.error('Error saving status changes:', error);
       alert('Error saving status changes');
     } finally {

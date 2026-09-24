@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { openWhatsAppPopup, closeWhatsAppPopup, sendOrderWhatsApp } from '@/lib/whatsappNotify';
 
 const createEmptyItem = () => ({
   id: null,
@@ -127,6 +128,7 @@ export default function EditOrderPage({ orderId: propOrderId, mode = 'edit' }) {
   };
 
   const handleSaveChanges = async () => {
+    let waPopup = null;
     try {
       setSaving(true);
       setError(null);
@@ -212,6 +214,11 @@ export default function EditOrderPage({ orderId: propOrderId, mode = 'edit' }) {
         })),
       };
 
+      const statusChanged = !!orderData && editFormData.status !== orderData.order.status;
+      const companyName = orderData?.company?.company_name || '';
+      // Must open synchronously (inside the click) so the browser doesn't block it.
+      waPopup = statusChanged ? openWhatsAppPopup() : null;
+
       const response = await fetch('/api/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -221,14 +228,27 @@ export default function EditOrderPage({ orderId: propOrderId, mode = 'edit' }) {
       if (response.ok) {
         setSuccessMessage('Order updated successfully!');
         await fetchOrderDetails(orderId);
+
+        if (statusChanged) {
+          sendOrderWhatsApp(waPopup, {
+            phone: editFormData.customerDetails.phone,
+            name: editFormData.customerDetails.customer_name,
+            orderId,
+            status: editFormData.status,
+            companyName,
+          });
+        }
+
         setTimeout(() => {
           window.location.hash = '#/admin/orders';
         }, 1500);
       } else {
+        closeWhatsAppPopup(waPopup);
         const data = await response.json();
         setError(data.error || 'Failed to save changes');
       }
     } catch (err) {
+      closeWhatsAppPopup(waPopup);
       setError(err.message || 'Error saving changes');
       console.error('Error saving changes:', err);
     } finally {

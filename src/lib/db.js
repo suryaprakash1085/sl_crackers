@@ -1,13 +1,13 @@
 import mysql from 'mysql2/promise';
 
 const dbConfig = {
-  host: 'localhost',
-  // user: 'paradise_pk_crackers',
-  // password: 'paradise_pk_crackers',
-  // database: 'paradise_pk_crackers',
-   user: 'sl_crackers_v2',
-  password: 'sl_crackers_v2',
-  database: 'sl_crackers_v2',
+  host: '192.168.31.53',
+  user: 'paradise_pk_crackers',
+  password: 'paradise_pk_crackers',
+  database: 'paradise_pk_crackers',
+  //  user: 'sl_crackers_v2',
+  // password: 'sl_crackers_v2',
+  // database: 'sl_crackers_v2',
 };
 
 export const emailConfig = {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import InvoicePrint from './InvoicePrint';
+import { openWhatsAppPopup, closeWhatsAppPopup, sendOrderWhatsApp } from '@/lib/whatsappNotify';
 
 export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode = false }) {
   const [orderData, setOrderData] = useState(null);
@@ -126,6 +127,10 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
   };
 
   const handleSaveChanges = async () => {
+    const statusChanged = !!orderData && editFormData.status !== orderData.order.status;
+    // Must open synchronously (inside the click) so the browser doesn't block it.
+    const waPopup = statusChanged ? openWhatsAppPopup() : null;
+
     try {
       setSaving(true);
       setError(null);
@@ -151,13 +156,26 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
       });
 
       if (response.ok) {
+        const companyName = orderData?.company?.company_name || '';
         setIsEditing(false);
         await fetchOrderDetails();
+
+        if (statusChanged) {
+          sendOrderWhatsApp(waPopup, {
+            phone: editFormData.customerDetails.phone,
+            name: editFormData.customerDetails.customer_name,
+            orderId,
+            status: editFormData.status,
+            companyName,
+          });
+        }
       } else {
+        closeWhatsAppPopup(waPopup);
         const data = await response.json();
         setError(data.error || 'Failed to save changes');
       }
     } catch (err) {
+      closeWhatsAppPopup(waPopup);
       setError(err.message || 'Error saving changes');
       console.error('Error saving changes:', err);
     } finally {

@@ -300,34 +300,38 @@ export default function GstInvoicePage() {
 
       <div className="gst-invoice-sheet-shell">
         <div className="gst-invoice-sheet" ref={invoiceSheetRef}>
-          <div className="gst-invoice-title-row">
-            <h1 className="gst-invoice-title">Tax Invoice</h1>
+          <div className="gst-invoice-header">
+            <div className="gst-header-brand">
+              {companyInfo?.logo ? (
+                <div className="gst-logo-box">
+                  <img src={companyInfo.logo} alt={companyName} className="gst-company-logo" />
+                </div>
+              ) : (
+                <div className="gst-logo-box gst-company-logo-fallback">GST</div>
+              )}
+              <div>
+                <h2 className="gst-company-name">{companyName}</h2>
+                <span className="gst-header-address">{companyAddress}</span>
+              </div>
+            </div>
+            <div className="gst-header-title">
+              <h1 className="gst-invoice-title">Tax Invoice</h1>
+              {invoiceData.invoiceNo && <span>#{invoiceData.invoiceNo}</span>}
+            </div>
           </div>
 
           <div className="gst-company-block">
-            <div className="gst-company-branding">
-              {companyInfo?.logo ? (
-                <img src={companyInfo.logo} alt={companyName} className="gst-company-logo" />
-              ) : (
-                <div className="gst-company-logo gst-company-logo-fallback">GST</div>
-              )}
-            </div>
-
-            <div className="gst-company-details">
-              <h2 className="gst-company-name">{companyName}</h2>
-              <p className="gst-company-line">{companyAddress}</p>
-              <p className="gst-company-line">Phone no.: {companyPhone} Email: {companyEmail}</p>
-              <p className="gst-company-line">
-                GSTIN: {companyGst}, State:{' '}
-                <input
-                  type="text"
-                  value={invoiceData.companyState}
-                  onChange={(event) => handleInvoiceFieldChange('companyState', event.target.value)}
-                  className="invoice-inline-input invoice-inline-state"
-                  placeholder="33-Tamil Nadu"
-                />
-              </p>
-            </div>
+            <p className="gst-company-line">Phone no.: {companyPhone} Email: {companyEmail}</p>
+            <p className="gst-company-line">
+              GSTIN: {companyGst}, State:{' '}
+              <input
+                type="text"
+                value={invoiceData.companyState}
+                onChange={(event) => handleInvoiceFieldChange('companyState', event.target.value)}
+                className="invoice-inline-input invoice-inline-state"
+                placeholder="33-Tamil Nadu"
+              />
+            </p>
           </div>
 
           <div className="invoice-summary-grid">
@@ -700,80 +704,104 @@ export default function GstInvoicePage() {
           width: 100%;
           max-width: 900px;
           background: #ffffff;
-          border: 1px solid #7b7b7b;
+          border: 1px solid #e2e6ea;
+          border-radius: 10px;
           box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
           print-color-adjust: exact;
           -webkit-print-color-adjust: exact;
           position: relative;
           display: block;
+          color: #1f2933;
         }
 
-        .gst-invoice-title-row {
-          border-bottom: 1px solid #7b7b7b;
-          padding: 8px 12px;
-          text-align: center;
-          width: 100%;
-          box-sizing: border-box;
+        .gst-invoice-header {
+          background: #1e3a5f;
+          color: #ffffff;
+          padding: 18px 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          border-radius: 9px 9px 0 0;
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+
+        .gst-header-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+        }
+
+        .gst-logo-box {
+          width: 46px;
+          height: 46px;
+          flex: 0 0 46px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #ffffff;
+          border-radius: 8px;
+        }
+
+        .gst-company-logo {
           display: block;
+          max-width: 40px;
+          max-height: 40px;
+          object-fit: contain;
+        }
+
+        .gst-company-logo-fallback {
+          font-size: 12px;
+          font-weight: 700;
+          color: #1e3a5f;
+        }
+
+        .gst-company-name {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 700;
+          letter-spacing: 0.3px;
+        }
+
+        .gst-header-address {
+          display: block;
+          font-size: 10px;
+          opacity: 0.85;
+          margin-top: 2px;
+        }
+
+        .gst-header-title {
+          text-align: right;
+          flex-shrink: 0;
         }
 
         .gst-invoice-title {
           margin: 0;
-          font-size: 20px;
-          font-weight: 700;
+          font-size: 22px;
+          font-weight: 800;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        .gst-header-title span {
           display: block;
+          font-size: 10px;
+          opacity: 0.85;
+          margin-top: 2px;
         }
 
         .gst-company-block {
-          display: grid;
-          grid-template-columns: 80px 1fr;
-          gap: 12px;
-          padding: 10px 12px;
-          border-bottom: 1px solid #7b7b7b;
-          align-items: flex-start;
-          width: 100%;
-          box-sizing: border-box;
-        }
-
-        .gst-company-branding {
-          display: flex;
-          align-items: flex-start;
-          justify-content: center;
-        }
-
-        .gst-company-logo {
-          width: 64px;
-          height: 64px;
-          object-fit: contain;
-          border: 1px solid #c7c7c7;
-          background: #ffffff;
-        }
-
-        .gst-company-logo-fallback {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 18px;
-          font-weight: 700;
-          color: #374151;
-        }
-
-        .gst-company-details {
-          text-align: right;
-        }
-
-        .gst-company-name {
-          margin: 0 0 4px;
-          font-size: 32px;
-          font-weight: 800;
-          line-height: 1.1;
-          text-transform: uppercase;
+          padding: 12px 24px;
+          border-bottom: 1px solid #e2e6ea;
         }
 
         .gst-company-line {
           margin: 0;
-          font-size: 13px;
-          line-height: 1.4;
+          font-size: 11px;
+          line-height: 1.6;
+          color: #52606d;
         }
 
         .invoice-summary-grid,
@@ -784,9 +812,9 @@ export default function GstInvoicePage() {
 
         .invoice-panel,
         .invoice-signature-panel {
-          min-height: 120px;
-          border-right: 1px solid #7b7b7b;
-          border-bottom: 1px solid #7b7b7b;
+          min-height: 100px;
+          border-right: 1px solid #e2e6ea;
+          border-bottom: 1px solid #e2e6ea;
         }
 
         .invoice-panel:nth-child(2),
@@ -795,13 +823,12 @@ export default function GstInvoicePage() {
         }
 
         .invoice-panel-heading {
-          background: #8f89eb;
-          color: #ffffff;
-          font-size: 14px;
+          color: #1e3a5f;
+          font-size: 10px;
           font-weight: 700;
-          padding: 6px 10px;
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          padding: 12px 24px 0;
         }
 
         .invoice-panel-heading-right {
@@ -809,8 +836,8 @@ export default function GstInvoicePage() {
         }
 
         .invoice-panel-body {
-          padding: 10px;
-          font-size: 13px;
+          padding: 8px 24px 12px;
+          font-size: 12px;
         }
 
         .bill-to-panel-body {
@@ -895,28 +922,36 @@ export default function GstInvoicePage() {
         .invoice-items-table td,
         .invoice-tax-table th,
         .invoice-tax-table td {
-          border-right: 1px solid #7b7b7b;
-          border-bottom: 1px solid #7b7b7b;
-          padding: 8px 6px;
-          font-size: 13px;
+          border-bottom: 1px solid #eef1f4;
+          padding: 9px 8px;
+          font-size: 11px;
           text-align: center;
           vertical-align: middle;
         }
 
-        .invoice-items-table th:last-child,
-        .invoice-items-table td:last-child,
-        .invoice-tax-table th:last-child,
-        .invoice-tax-table td:last-child {
-          border-right: none;
-        }
-
         .invoice-items-table thead th,
         .invoice-tax-table thead th {
-          background: #8f89eb;
+          background: #1e3a5f;
           color: #ffffff;
-          font-weight: 700;
+          font-weight: 600;
+          font-size: 9px;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+          border-bottom: none;
           print-color-adjust: exact;
           -webkit-print-color-adjust: exact;
+        }
+
+        .invoice-items-table tbody tr {
+          page-break-inside: avoid;
+        }
+
+        .invoice-items-table tbody tr:nth-child(even) {
+          background: #f8fafc;
+        }
+
+        .invoice-items-table td.invoice-item-cell-wrapper {
+          text-align: left;
         }
 
         .table-cell-serial {
@@ -1040,6 +1075,9 @@ export default function GstInvoicePage() {
 
         .invoice-total-row td {
           font-weight: 700;
+          background: #eef3f8;
+          color: #1e3a5f;
+          border-bottom: none;
         }
 
         .invoice-total-label-cell {
@@ -1048,7 +1086,7 @@ export default function GstInvoicePage() {
 
         .invoice-tax-breakup-panel,
         .invoice-amounts-panel {
-          border-bottom: 1px solid #7b7b7b;
+          border-bottom: 1px solid #e2e6ea;
         }
 
         .invoice-amounts-panel {
@@ -1057,12 +1095,14 @@ export default function GstInvoicePage() {
 
         .invoice-amount-row {
           justify-content: space-between;
-          padding: 9px 10px 0;
-          font-size: 13px;
+          padding: 9px 24px 0;
+          font-size: 12px;
         }
 
         .invoice-grand-total-row {
           font-weight: 700;
+          font-size: 14px;
+          color: #1e3a5f;
         }
 
         .invoice-received-row {
@@ -1146,20 +1186,17 @@ export default function GstInvoicePage() {
             align-items: stretch;
           }
 
-          .gst-company-block {
-            grid-template-columns: 1fr;
+          .gst-invoice-header {
+            flex-direction: column;
+            align-items: flex-start;
           }
 
-          .gst-company-branding {
-            justify-content: flex-start;
-          }
-
-          .gst-company-details {
+          .gst-header-title {
             text-align: left;
           }
 
           .gst-company-name {
-            font-size: 24px;
+            font-size: 18px;
           }
 
           .invoice-panel,
@@ -1242,7 +1279,8 @@ export default function GstInvoicePage() {
             width: 100%;
             margin: 0;
             padding: 0;
-            border: 1px solid #7b7b7b;
+            border: none;
+            border-radius: 0;
             box-shadow: none;
             page-break-after: avoid;
             print-color-adjust: exact;
