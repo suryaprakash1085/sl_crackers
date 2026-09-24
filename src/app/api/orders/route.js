@@ -59,7 +59,7 @@ export async function POST(request) {
 
       await connection.execute(
         'INSERT INTO order_items (order_id, product_id, product_name, quantity, price, discount) VALUES (?, ?, ?, ?, ?, ?)',
-        [orderId, item.id || null, item.name, item.quantity, itemPrice, discountPercent]
+        [orderId, item.id || null, item.name, item.quantity, item.price, discountPercent]
       );
     }
 

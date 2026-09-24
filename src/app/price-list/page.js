@@ -204,7 +204,8 @@ export default function PriceList() {
       id: product.id,
       name: product.name,
       originalPrice,
-      price: salePrice,
+      discountPrice:salePrice,
+      price: originalPrice,
       image: product.image_full || product.image,
     }, newQuantity);
   };

@@ -90,8 +90,8 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
       ? item.originalPrice
       : parseFloat(item.originalPrice?.replace('₹', '') || 0);
 
-    // Calculate discount percentage and amount
-    const discountPercent = originalPrice > 0 ? Math.round(((originalPrice - salePrice) / originalPrice) * 100) : 0;
+    // The catalog offer is 75%; keep the stored sale price and totals unchanged.
+    const discountPercent = 75;
     const discountAmount = originalPrice - salePrice;
     const amount = (salePrice * item.quantity).toFixed(2);
 
