@@ -76,6 +76,21 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
   }, 0);
 
   const totalAmount = cartTotal;
+  const itemsPerPage = 24;
+  const repeatedTableHeader = `
+    <tr class="repeat-page-top-margin">
+      <th colspan="7"></th>
+    </tr>
+    <tr class="repeat-table-header">
+      <th class="col-sno">S.No</th>
+      <th class="col-item" style="text-align: left;">Item Name</th>
+      <th class="col-rate">Product Rate</th>
+      <th class="col-discount">Discount</th>
+      <th class="col-discount-rate">Discount Rate</th>
+      <th class="col-qty">Quantity</th>
+      <th class="col-amount" style="text-align: right;">Amount</th>
+    </tr>
+  `;
 
   const itemsHTML = orderData.items.map((item, index) => {
     // Get the sale price from item.price or item.discount
@@ -97,7 +112,11 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
 // const amount = (disAmount * item.quantity).toFixed(2);
     const amount = (salePrice * item.quantity).toFixed(2);
 
-    return `
+    const pageHeader = index > 0 && index % itemsPerPage === 0
+      ? repeatedTableHeader
+      : '';
+
+    return `${pageHeader}
       <tr style="border: 1px solid #000;">
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">${index + 1}</td>
         <td style="border: 1px solid #000; padding: 8px;">${item.name}</td>
@@ -134,8 +153,8 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
         }
         .invoice-container {
           border: 2px solid #000;
-          width: 210mm;
-          max-width: 100%;
+          width: 100%;
+          max-width: 190mm;
           height: auto;
           margin: 0 auto;
           background: white;
@@ -254,6 +273,8 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
           padding: 8px 4px;
           vertical-align: middle;
           word-wrap: break-word;
+          overflow-wrap: anywhere;
+          box-sizing: border-box;
           font-size: 10px;
         }
         .items-table th {
@@ -264,10 +285,42 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
         }
         .items-table tbody tr {
           page-break-inside: avoid;
+          break-inside: avoid;
         }
         .items-table thead {
           display: table-header-group;
         }
+        .page-top-margin th {
+          height: 10mm;
+          padding: 0;
+          border: 0;
+          background: #fff;
+        }
+        .repeat-page-top-margin {
+          page-break-before: always;
+          break-before: page;
+        }
+        .repeat-page-top-margin th {
+          height: 10mm;
+          padding: 0;
+          border: 0;
+          background: #fff;
+        }
+        .repeat-table-header th {
+          padding: 8px 4px;
+          border: 2px solid #000;
+          background: #f5f5f5;
+          font-weight: bold;
+          text-align: center;
+          font-size: 10px;
+        }
+        .col-sno { width: 7%; }
+        .col-item { width: 31%; }
+        .col-rate { width: 13%; }
+        .col-discount { width: 11%; }
+        .col-discount-rate { width: 13%; }
+        .col-qty { width: 9%; }
+        .col-amount { width: 16%; }
         .total-row {
           font-weight: bold;
           background: #fff;
@@ -391,9 +444,8 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
             background: white;
           }
           @page {
-            size: A4;
-            margin: 0;
-            padding: 0;
+            size: A4 portrait;
+            margin: 10mm;
           }
         }
       </style>
@@ -456,7 +508,19 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
 
         <!-- Items Table -->
         <table class="items-table">
+          <colgroup>
+            <col class="col-sno">
+            <col class="col-item">
+            <col class="col-rate">
+            <col class="col-discount">
+            <col class="col-discount-rate">
+            <col class="col-qty">
+            <col class="col-amount">
+          </colgroup>
           <thead>
+            <tr class="page-top-margin">
+              <th colspan="7"></th>
+            </tr>
             <tr>
               <th>S.No</th>
               <th>Item Name</th>
@@ -527,7 +591,7 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
   `;
 
   const opt = {
-    margin: 0,
+    margin: [10, 10, 10, 10],
     filename: `Invoice-${invoiceNumber}.pdf`,
     image: { type: 'jpeg', quality: 0.95 },
     html2canvas: {
@@ -543,7 +607,10 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
       orientation: 'portrait',
       compress: true
     },
-    pagebreak: { mode: ['css', 'legacy'] }
+    pagebreak: {
+      mode: ['css', 'legacy'],
+      avoid: ['.items-table tbody tr', '.payment-section', '.declaration-section']
+    }
   };
 
   const pdfBlob = await html2pdf().set(opt).from(invoiceHTML).outputPdf('blob');

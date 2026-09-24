@@ -100,13 +100,13 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
         <table className="items-table">
           <thead>
             <tr>
-              <th className="w-10">S.No</th>
-              <th className="w-40 text-left">Item Name</th>
-              <th className="w-15">Product Rate</th>
-              <th className="w-10">Discount</th>
-              <th className="w-10">Discount Rate</th>
-              <th className="w-5">Quantity</th>
-              <th className="w-10 text-right">Amount</th>
+              <th className="col-sno">S.No</th>
+              <th className="col-item text-left">Item Name</th>
+              <th className="col-rate">Product Rate</th>
+              <th className="col-discount">Discount</th>
+              <th className="col-discount-rate">Discount Rate</th>
+              <th className="col-qty">Quantity</th>
+              <th className="col-amount text-right">Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -205,6 +205,7 @@ const amount = disAmount * item.quantity;
         .invoice-outer-border {
           border: 2px solid #000;
           box-sizing: border-box;
+          width: 100%;
         }
  
         .main-title {
@@ -311,6 +312,8 @@ const amount = disAmount * item.quantity;
           border-collapse: collapse;
           margin: 0;
           table-layout: fixed;
+          break-inside: auto;
+          page-break-inside: auto;
         }
  
         .items-table th, .items-table td {
@@ -318,6 +321,8 @@ const amount = disAmount * item.quantity;
           padding: 8px 4px;
           vertical-align: middle;
           word-wrap: break-word;
+          overflow-wrap: anywhere;
+          box-sizing: border-box;
         }
  
         .items-table th {
@@ -328,7 +333,17 @@ const amount = disAmount * item.quantity;
           border: 2px solid #000;
         }
  
+        .items-table thead {
+          display: table-header-group;
+        }
+
         .items-table tbody tr {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+
+        .items-table tfoot {
+          break-inside: avoid;
           page-break-inside: avoid;
         }
  
@@ -341,10 +356,13 @@ const amount = disAmount * item.quantity;
         .text-right { text-align: right; }
         .font-bold { font-weight: bold; }
  
-        .w-10 { width: 10%; }
-        .w-40 { width: 40%; }
-        .w-15 { width: 15%; }
-        .w-5 { width: 5%; }
+        .col-sno { width: 7%; }
+        .col-item { width: 31%; }
+        .col-rate { width: 13%; }
+        .col-discount { width: 11%; }
+        .col-discount-rate { width: 13%; }
+        .col-qty { width: 9%; }
+        .col-amount { width: 16%; }
  
         .total-row {
           background: #fff;
@@ -364,6 +382,8 @@ const amount = disAmount * item.quantity;
           min-height: 30px;
           display: flex;
           align-items: center;
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
  
         .footer-info-grid {
@@ -371,6 +391,8 @@ const amount = disAmount * item.quantity;
           grid-template-columns: 1fr 1fr 1fr;
           border-bottom: 1px solid #000;
           min-height: 60px;
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
  
         .bank-box, .gpay-box, .upi-box {
@@ -393,6 +415,8 @@ const amount = disAmount * item.quantity;
           display: grid;
           grid-template-columns: 1fr 1fr;
           min-height: 80px;
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
  
         .declaration {
@@ -458,7 +482,8 @@ const amount = disAmount * item.quantity;
             width: 100%;
             height: auto;
             background: white;
-            page-break-after: always;
+            page-break-after: auto;
+            break-after: auto;
           }
  
           .invoice-outer-border {
@@ -467,9 +492,8 @@ const amount = disAmount * item.quantity;
           }
  
           @page {
-            size: A4;
-            margin: 0;
-            padding: 0;
+            size: A4 portrait;
+            margin: 10mm;
           }
         }
       `}</style>

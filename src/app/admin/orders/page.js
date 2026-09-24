@@ -102,7 +102,10 @@ export default function OrdersPage() {
                   format: 'a4',
                   compress: true
                 },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                pagebreak: {
+                  mode: ['css', 'legacy'],
+                  avoid: ['.items-table tbody tr', '.items-table tfoot', '.words-section', '.footer-info-grid', '.bottom-grid']
+                }
               };
 
               await html2pdf().set(options).from(invoiceRef.current).save();
