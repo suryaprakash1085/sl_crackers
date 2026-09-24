@@ -92,7 +92,9 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
 
     // The catalog offer is 75%; keep the stored sale price and totals unchanged.
     const discountPercent = 75;
-    const discountAmount = originalPrice - salePrice;
+const discountAmount = originalPrice * (discountPercent / 100); // 75% discount
+const disAmount = originalPrice - discountAmount;               // balance 25%
+// const amount = (disAmount * item.quantity).toFixed(2);
     const amount = (salePrice * item.quantity).toFixed(2);
 
     return `
@@ -101,7 +103,7 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
         <td style="border: 1px solid #000; padding: 8px;">${item.name}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${originalPrice.toFixed(0)}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">${discountPercent}%</td>
-        <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${discountAmount.toFixed(0)}</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${disAmount.toFixed(0)}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.quantity}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: right;">₹ ${amount}</td>
       </tr>

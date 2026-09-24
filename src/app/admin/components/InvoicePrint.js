@@ -123,7 +123,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
                   <td className="text-left font-bold">{item.product_name}</td>
                   <td className="text-center">₹ {rate.toFixed(0)}</td>
                   <td className="text-center">{discPercent}%</td>
-                  <td className="text-center">₹ {discRate.toFixed(0)}</td>
+                  <td className="text-center">₹ {rate.toFixed(0)}</td>
                   <td className="text-center">{item.quantity}</td>
                   <td className="text-right">₹ {Math.round(amount)}</td>
                 </tr>
