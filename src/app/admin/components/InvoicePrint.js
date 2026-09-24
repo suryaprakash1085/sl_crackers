@@ -112,10 +112,10 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
           <tbody>
             {items.map((item, index) => {
               const rate = parseFloat(item.price);
-              const discPercent = 75;
-              const discRate = rate * (discPercent / 100);
-              const discountedPrice = rate - discRate;
-              const amount = discountedPrice * item.quantity;
+             const discPercent = 75;
+const discRate = rate * (discPercent / 100);   // 75% discount
+const disAmount = rate - discRate;             // balance 25%
+const amount = disAmount * item.quantity;
              
               return (
                 <tr key={index}>
@@ -123,7 +123,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
                   <td className="text-left font-bold">{item.product_name}</td>
                   <td className="text-center">₹ {rate.toFixed(0)}</td>
                   <td className="text-center">{discPercent}%</td>
-                  <td className="text-center">₹ {rate.toFixed(0)}</td>
+                  <td className="text-center">₹ {Number(disAmount.toFixed(0))}</td>   
                   <td className="text-center">{item.quantity}</td>
                   <td className="text-right">₹ {Math.round(amount)}</td>
                 </tr>
