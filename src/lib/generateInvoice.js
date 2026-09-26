@@ -44,6 +44,21 @@ function amountToWords(amount) {
   return `${words.join(' ')} rupees only`;
 }
 
+function parsePrice(value) {
+  const parsed = typeof value === 'number'
+    ? value
+    : Number.parseFloat(String(value ?? '').replace(/[^\d.-]/g, ''));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function getInvoiceItemPrices(item) {
+  const salePrice = parsePrice(item.discountPrice ?? item.salePrice ?? item.price ?? item.discount);
+  const listedPrice = parsePrice(item.originalPrice ?? item.price);
+  const originalPrice = listedPrice > 0 ? listedPrice : salePrice / 0.25;
+
+  return { originalPrice, salePrice };
+}
+
 export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { download = true } = {}) => {
   // Dynamically import html2pdf only on the client side
   const html2pdf = (await import('html2pdf.js')).default;
@@ -67,62 +82,23 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
   const displayOrderNumber = orderId ? String(orderId + 11110).padStart(5, '0') : '00001';
 
   const cartTotal = orderData.items.reduce((sum, item) => {
-    const price = typeof item.price === 'number'
-      ? item.price
-      : typeof item.discount === 'number'
-        ? item.discount
-        : parseFloat(item.price?.replace('₹', '') || item.discount?.replace('₹', '') || 0);
-    return sum + (price * item.quantity);
+    const { salePrice } = getInvoiceItemPrices(item);
+    return sum + (salePrice * item.quantity);
   }, 0);
 
   const totalAmount = cartTotal;
-  const itemsPerPage = 24;
-  const repeatedTableHeader = `
-    <tr class="repeat-page-top-margin">
-      <th colspan="7"></th>
-    </tr>
-    <tr class="repeat-table-header">
-      <th class="col-sno">S.No</th>
-      <th class="col-item" style="text-align: left;">Item Name</th>
-      <th class="col-rate">Product Rate</th>
-      <th class="col-discount">Discount</th>
-      <th class="col-discount-rate">Discount Rate</th>
-      <th class="col-qty">Quantity</th>
-      <th class="col-amount" style="text-align: right;">Amount</th>
-    </tr>
-  `;
 
   const itemsHTML = orderData.items.map((item, index) => {
-    // Get the sale price from item.price or item.discount
-    const salePrice = typeof item.price === 'number'
-      ? item.price
-      : typeof item.discount === 'number'
-        ? item.discount
-        : parseFloat(item.price?.replace('₹', '') || item.discount?.replace('₹', '') || 0);
-
-    // Get original price for calculating discount
-    const originalPrice = typeof item.originalPrice === 'number'
-      ? item.originalPrice
-      : parseFloat(item.originalPrice?.replace('₹', '') || 0);
-
-    // The catalog offer is 75%; keep the stored sale price and totals unchanged.
+    const { originalPrice, salePrice } = getInvoiceItemPrices(item);
     const discountPercent = 75;
-const discountAmount = originalPrice * (discountPercent / 100); // 75% discount
-const disAmount = originalPrice - discountAmount;               // balance 25%
-// const amount = (disAmount * item.quantity).toFixed(2);
     const amount = (salePrice * item.quantity).toFixed(2);
 
-    const pageHeader = index > 0 && index % itemsPerPage === 0
-      ? repeatedTableHeader
-      : '';
-
-    return `${pageHeader}
-      <tr style="border: 1px solid #000;">
+    return `<tr style="border: 1px solid #000;">
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">${index + 1}</td>
         <td style="border: 1px solid #000; padding: 8px;">${item.name}</td>
-        <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${originalPrice.toFixed(0)}</td>
-        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${discountPercent}%</td>
-        <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${disAmount.toFixed(0)}</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${originalPrice.toFixed(2)}</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${discountPercent.toFixed(2).replace(/\.00$/, '')}%</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${salePrice.toFixed(2)}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.quantity}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: right;">₹ ${amount}</td>
       </tr>
@@ -267,15 +243,20 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
           border-collapse: collapse;
           margin: 0;
           table-layout: fixed;
+          border: 1px solid #000;
         }
         .items-table th, .items-table td {
           border: 1px solid #000;
-          padding: 8px 4px;
+          padding: 5px 3px;
           vertical-align: middle;
           word-wrap: break-word;
           overflow-wrap: anywhere;
           box-sizing: border-box;
-          font-size: 10px;
+          font-size: 9px;
+        }
+        .items-table th:not(:nth-child(2)), .items-table td:not(:nth-child(2)) {
+          white-space: nowrap;
+          overflow-wrap: normal;
         }
         .items-table th {
           background: #f5f5f5;
@@ -287,40 +268,27 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
           page-break-inside: avoid;
           break-inside: avoid;
         }
+        .items-table tbody {
+          height: 90mm;
+          vertical-align: top;
+        }
+        .items-table tbody td {
+          vertical-align: top;
+          box-shadow: inset 0 1px 0 #000;
+        }
         .items-table thead {
           display: table-header-group;
         }
-        .page-top-margin th {
-          height: 10mm;
-          padding: 0;
-          border: 0;
-          background: #fff;
+        .items-table tfoot {
+          display: table-row-group;
         }
-        .repeat-page-top-margin {
-          page-break-before: always;
-          break-before: page;
-        }
-        .repeat-page-top-margin th {
-          height: 10mm;
-          padding: 0;
-          border: 0;
-          background: #fff;
-        }
-        .repeat-table-header th {
-          padding: 8px 4px;
-          border: 2px solid #000;
-          background: #f5f5f5;
-          font-weight: bold;
-          text-align: center;
-          font-size: 10px;
-        }
-        .col-sno { width: 7%; }
-        .col-item { width: 31%; }
+        .col-sno { width: 8%; }
+        .col-item { width: 27%; }
         .col-rate { width: 13%; }
         .col-discount { width: 11%; }
-        .col-discount-rate { width: 13%; }
+        .col-discount-rate { width: 15%; }
         .col-qty { width: 9%; }
-        .col-amount { width: 16%; }
+        .col-amount { width: 17%; }
         .total-row {
           font-weight: bold;
           background: #fff;
@@ -518,9 +486,6 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
             <col class="col-amount">
           </colgroup>
           <thead>
-            <tr class="page-top-margin">
-              <th colspan="7"></th>
-            </tr>
             <tr>
               <th>S.No</th>
               <th>Item Name</th>
@@ -533,12 +498,14 @@ const disAmount = originalPrice - discountAmount;               // balance 25%
           </thead>
           <tbody>
             ${itemsHTML}
+          </tbody>
+          <tfoot>
             <tr class="total-row">
               <td colspan="5" style="text-align: right;">Total</td>
               <td style="text-align: center;">${orderData.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
               <td style="text-align: right;">₹ ${cartTotal.toFixed(2)}</td>
             </tr>
-          </tbody>
+          </tfoot>
         </table>
 
         <!-- Amount in Words -->
