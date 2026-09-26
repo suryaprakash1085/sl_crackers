@@ -1,14 +1,14 @@
 'use client';
- 
+
 import React from 'react';
- 
+
 // Utility to convert number to words
 function amountToWords(amount) {
   const num = Math.floor(amount);
   const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
   const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
   const teens = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
- 
+
   function convert(n) {
     if (n < 10) return ones[n];
     if (n < 20) return teens[n - 10];
@@ -17,31 +17,31 @@ function amountToWords(amount) {
     if (n < 100000) return convert(Math.floor(n / 1000)) + " thousand" + (n % 1000 !== 0 ? " " + convert(n % 1000) : "");
     return n.toString();
   }
- 
+
   if (num === 0) return "Zero";
   const result = convert(num);
   return result.charAt(0).toUpperCase() + result.slice(1) + " only";
 }
- 
+
 export default function InvoicePrint({ orderData, company, containerRef, paymentMethods = null }) {
   if (!orderData) return null;
- 
+
   const { order, items } = orderData;
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
   const subTotal = parseFloat(order.total_amount);
- 
+
   // Calculate display order number (5-digit format starting from 11111)
   const displayOrderNumber = order.id ? String(order.id + 11110).padStart(5, '0') : '00001';
- 
+
   // Get payment methods from props or localStorage
   const getPaymentMethods = () => {
     if (paymentMethods) return paymentMethods;
- 
+
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('adminPayments');
       if (saved) return JSON.parse(saved);
     }
- 
+
     // Default fallback
     return {
       bankAccount: { name: '', accountNo: '', bankName: '', ifscCode: '' },
@@ -49,53 +49,42 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
       upi: { name: '', id: '' }
     };
   };
- 
+
   const payments = getPaymentMethods();
- 
+
   return (
     <div ref={containerRef} className="invoice-print-container">
       <div className="invoice-outer-border">
-        <h2 className="main-title">BILL</h2>
-       
-        {/* Header Section */}
-        <div className="header-section">
-          <div className="company-info">
-            {company?.logo && (
-              <div className="logo-box">
-                <img src={company.logo} alt="logo" className="logo-img" />
-              </div>
-            )}
-            <div className="details-box">
-              <h1 className="company-name">{company?.company_name || 'Your Company Name'}</h1>
-              {company?.address && <p>{company.address}</p>}
-              {company?.email && <p>Gmail: {company.email}</p>}
-              {company?.website && <p>Website: {company.website}</p>}
-              {company?.phone_number && <p>Mob: {company.phone_number}</p>}
-            </div>
+        <div className="invoice-topline">
+          <span>Invoice No: {order.invoice_number || `CC/${order.id}`}</span>
+          <strong>TAX INVOICE</strong>
+          <span>Original Copy</span>
+        </div>
+
+        <div className="company-heading">
+          {company?.logo && <img src={company.logo} alt="Company logo" className="logo-img" />}
+          <h1>{company?.company_name || 'Your Company Name'}</h1>
+          {company?.address && <p>{company.address}</p>}
+          <p>{[company?.email, company?.website, company?.phone_number].filter(Boolean).join(' | ')}</p>
+          {company?.gst_number && <p>GSTIN: {company.gst_number}</p>}
+        </div>
+
+        <div className="bill-details">
+          <div className="billed-to">
+            <h2>Billing Details</h2>
+            <p><strong>Customer Name:</strong> {order.customer_name}</p>
+            <p>{order.address}</p>
+            <p><strong>Mobile:</strong> {order.phone}</p>
+            <p><strong>Email:</strong> {order.email}</p>
           </div>
           <div className="bill-info">
-            <div className="row"><span className="label">Bill No:</span> <span className="value">{order.invoice_number || `CC/${order.id}`}</span></div>
-            <div className="row"><span className="label">Order No:</span> <span className="value">{displayOrderNumber}</span></div>
-            <div className="row"><span className="label">Date:</span> <span className="value">{new Date(order.created_at).toLocaleDateString('en-GB')}</span></div>
-            <div className="row"><span className="label">Payment:</span> <span className="value font-bold">{order.payment_status || 'UnPaid'}</span></div>
+            <div className="row"><span className="label">Invoice Number</span><span>{order.invoice_number || `CC/${order.id}`}</span></div>
+            <div className="row"><span className="label">Invoice Date</span><span>{new Date(order.created_at).toLocaleDateString('en-GB')}</span></div>
+            <div className="row"><span className="label">Order Number</span><span>{displayOrderNumber}</span></div>
+            <div className="row"><span className="label">Payment</span><span className="font-bold">{order.payment_status || 'UnPaid'}</span></div>
           </div>
         </div>
- 
-        {/* Billed To / Transporter Section */}
-        <div className="client-grid">
-          <div className="billed-to">
-            <div className="label-top">Billed To:</div>
-            <div className="client-name">{order.customer_name}</div>
-            <div>{order.address}</div>
-            <div>Mob: {order.phone}</div>
-            <div>Email: {order.email}</div>
-          </div>
-          <div className="transporter">
-            <div className="t-row"><span className="t-label">Transporter Name:</span></div>
-            <div className="t-row mt-auto"><span className="t-label">LR No.</span></div>
-          </div>
-        </div>
- 
+
         {/* Items Table */}
         <table className="items-table">
           <thead>
@@ -112,24 +101,23 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
           <tbody>
             {items.map((item, index) => {
               const rate = parseFloat(item.price);
-             const discPercent = 75;
-const discRate = rate * (discPercent / 100);   // 75% discount
-const disAmount = rate - discRate;             // balance 25%
-const amount = disAmount * item.quantity;
-             
+              const discPercent = 75;
+              const discRate = rate * (discPercent / 100);   // 75% discount
+              const disAmount = rate - discRate;             // balance 25%
+              const amount = disAmount * item.quantity;
+
               return (
                 <tr key={index}>
                   <td className="text-center">{index + 1}</td>
                   <td className="text-left font-bold">{item.product_name}</td>
                   <td className="text-center">₹ {rate.toFixed(0)}</td>
                   <td className="text-center">{discPercent}%</td>
-                  <td className="text-center">₹ {Number(disAmount.toFixed(0))}</td>   
+                  <td className="text-center">₹ {Number(disAmount.toFixed(0))}</td>
                   <td className="text-center">{item.quantity}</td>
                   <td className="text-right">₹ {Math.round(amount)}</td>
                 </tr>
               );
             })}
-            {/* Pad empty rows to maintain height if needed */}
           </tbody>
           <tfoot>
             <tr className="total-row">
@@ -147,39 +135,34 @@ const amount = disAmount * item.quantity;
             </tr>
           </tfoot>
         </table>
- 
+
         {/* Amount in Words */}
         <div className="words-section">
-          INR {amountToWords(subTotal)}
+          <strong>Amount in words:</strong>&nbsp; INR {amountToWords(subTotal)}
         </div>
- 
-        {/* Footer Grid */}
-        <div className="footer-info-grid">
-          <div className="bank-box">
-            {payments.bankAccount?.name && <p className="font-bold">A/C Name: {payments.bankAccount.name}</p>}
-            {payments.bankAccount?.bankName && <p>Bank Name: {payments.bankAccount.bankName}</p>}
-            {payments.bankAccount?.accountNo && <p>Current A/C No: {payments.bankAccount.accountNo}</p>}
-            {payments.bankAccount?.ifscCode && <p>IFSC Code: {payments.bankAccount.ifscCode}</p>}
-          </div>
-          <div className="gpay-box">
-            {payments.gpay?.name && <p className="font-bold">Name: {payments.gpay.name}</p>}
-            {payments.gpay?.number && <p>G-Pay No: {payments.gpay.number}</p>}
-          </div>
-          <div className="upi-box">
-            {payments.upi?.name && <p className="font-bold">UPI Name: {payments.upi.name}</p>}
-            {payments.upi?.id && <p>UPI ID: {payments.upi.id}</p>}
-            {payments.upi?.qrCode && (
-              <div className="upi-qr-container">
-                <img src={payments.upi.qrCode} alt="UPI QR Code" className="upi-qr-image" />
-              </div>
-            )}
+
+        <div className="summary-section">
+          <div className="summary-row">
+            <strong>Total Amount</strong>
+            <strong>₹ {subTotal.toFixed(2)}</strong>
           </div>
         </div>
- 
-        {/* Declaration and Signature */}
-        <div className="bottom-grid">
+
+        <div className="invoice-footer">
           <div className="declaration">
-            <div className="label-top">Declaration</div>
+            <h3>Declaration</h3>
+          </div>
+          <div className="payment-summary">
+            <h3>Payment Details</h3>
+            {payments.bankAccount?.name && <p><strong>A/C Name:</strong> {payments.bankAccount.name}</p>}
+            {payments.bankAccount?.bankName && <p><strong>Bank:</strong> {payments.bankAccount.bankName}</p>}
+            {payments.bankAccount?.accountNo && <p><strong>Account No:</strong> {payments.bankAccount.accountNo}</p>}
+            {payments.bankAccount?.ifscCode && <p><strong>IFSC:</strong> {payments.bankAccount.ifscCode}</p>}
+            {payments.gpay?.name && <p><strong>GPay:</strong> {payments.gpay.name} {payments.gpay.number}</p>}
+            {payments.upi?.name && <p><strong>UPI:</strong> {payments.upi.name} {payments.upi.id}</p>}
+            {payments.upi?.qrCode && (
+              <img src={payments.upi.qrCode} alt="UPI QR Code" className="upi-qr-image" />
+            )}
           </div>
           <div className="signature">
             <div className="for-company">for {company?.company_name || 'Your Company'}</div>
@@ -187,7 +170,7 @@ const amount = disAmount * item.quantity;
           </div>
         </div>
       </div>
- 
+
       <style jsx>{`
         .invoice-print-container {
           background: white;
@@ -196,301 +179,300 @@ const amount = disAmount * item.quantity;
           margin: 0 auto;
           color: black;
           font-family: Arial, sans-serif;
-          font-size: 11px;
+          font-size: 10px;
           padding: 5mm;
           box-sizing: border-box;
-          line-height: 1.4;
+          line-height: 1.3;
         }
- 
+
         .invoice-outer-border {
-          border: 2px solid #000;
+          border: 1px solid #666;
           box-sizing: border-box;
           width: 100%;
         }
- 
-        .main-title {
-          text-align: center;
-          border-bottom: 1px solid #000;
-          margin: 0;
-          padding: 8px;
-          font-size: 16px;
-          font-weight: bold;
-        }
- 
-        .header-section {
+
+        .invoice-topline {
           display: grid;
-          grid-template-columns: 2fr 1fr;
-          border-bottom: 1px solid #000;
-          min-height: 70px;
-        }
- 
-        .company-info {
-          display: flex;
-          border-right: 1px solid #000;
-          padding: 8px;
-          gap: 10px;
-          align-items: flex-start;
-        }
- 
-        .logo-box {
-          width: 50px;
-          height: 50px;
-          display: flex;
+          grid-template-columns: 1fr auto 1fr;
           align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
- 
-        .logo-img {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
-        }
- 
-        .details-box h1 {
-          font-size: 14px;
-          margin: 0 0 3px 0;
-          font-weight: bold;
-        }
- 
-        .details-box p {
-          margin: 1px 0;
-          line-height: 1.2;
+          min-height: 22px;
+          padding: 3px 6px;
+          background: #f2f2f2;
+          border-bottom: 1px solid #888;
           font-size: 9px;
         }
- 
-        .bill-info {
-          padding: 8px;
-          font-size: 10px;
+
+        .invoice-topline strong {
+          text-align: center;
+          font-size: 13px;
         }
- 
-        .bill-info .row {
-          display: flex;
-          margin-bottom: 6px;
-          gap: 5px;
+
+        .invoice-topline span:last-child {
+          text-align: right;
         }
- 
-        .bill-info .label {
-          width: 60px;
-          font-weight: bold;
+
+        .company-heading {
+          padding: 5px 10px 7px;
+          text-align: center;
+          border-bottom: 1px solid #888;
         }
- 
-        .client-grid {
+
+        .company-heading .logo-img {
+          display: block;
+          max-width: 42px;
+          max-height: 32px;
+          margin: 0 auto 2px;
+          object-fit: contain;
+        }
+
+        .company-heading h1 {
+          margin: 0 0 2px;
+          font-family: Georgia, 'Times New Roman', serif;
+          font-size: 15px;
+        }
+
+        .company-heading p {
+          margin: 1px 0;
+          font-size: 9px;
+        }
+
+        .bill-details {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          border-bottom: 1px solid #000;
-          min-height: 70px;
+          border-bottom: 1px solid #888;
+          min-height: 54px;
         }
- 
+
+        .billed-to,
+        .bill-info {
+          padding: 6px;
+          font-size: 9px;
+        }
+
         .billed-to {
-          padding: 8px;
-          border-right: 1px solid #000;
+          border-right: 1px solid #888;
+        }
+
+        .billed-to h2 {
+          margin: 0 0 3px;
           font-size: 10px;
         }
- 
-        .transporter {
-          padding: 8px;
+
+        .billed-to p {
+          margin: 1px 0;
+          overflow-wrap: anywhere;
+        }
+
+        .billed-to strong {
+          font-size: 10px;
+        }
+
+        .bill-info .row {
           display: flex;
-          flex-direction: column;
-          font-size: 10px;
-        }
- 
-        .label-top {
-          font-weight: bold;
-          font-size: 10px;
-          margin-bottom: 5px;
-        }
- 
-        .client-name {
-          font-size: 12px;
-          font-weight: bold;
           margin-bottom: 2px;
+          gap: 4px;
         }
- 
+
+        .bill-info .label {
+          min-width: 75px;
+          font-weight: bold;
+        }
+
+        /* ---- TABLE: fixed for correct print pagination ---- */
         .items-table {
           width: 100%;
           border-collapse: collapse;
           margin: 0;
           table-layout: fixed;
-          break-inside: auto;
-          page-break-inside: auto;
+          border: 1px solid #777;
         }
- 
+
         .items-table th, .items-table td {
-          border: 1px solid #000;
-          padding: 8px 4px;
+          border: 1px solid #777;
+          padding: 5px 3px;
           vertical-align: middle;
           word-wrap: break-word;
           overflow-wrap: anywhere;
           box-sizing: border-box;
+          font-size: 9px;
         }
- 
+
+        .items-table th:not(:nth-child(2)),
+        .items-table td:not(:nth-child(2)) {
+          white-space: nowrap;
+          overflow-wrap: normal;
+        }
+
         .items-table th {
-          background: #f5f5f5;
+          background: #f1f1f1;
           font-weight: bold;
           text-align: center;
-          font-size: 10px;
-          border: 2px solid #000;
+          border: 1px solid #777;
         }
- 
+
+        /* Repeat header row on every printed page */
         .items-table thead {
           display: table-header-group;
         }
 
+        .items-table tfoot {
+          display: table-footer-group;
+        }
+
+        /* Never split a row across a page break */
         .items-table tbody tr {
           break-inside: avoid;
           page-break-inside: avoid;
         }
 
-        .items-table tfoot {
+        .items-table tfoot tr {
           break-inside: avoid;
           page-break-inside: avoid;
         }
- 
+
         .items-table tbody td {
-          border: 1px solid #000;
+          vertical-align: top;
         }
- 
+
         .text-center { text-align: center; }
         .text-left { text-align: left; }
         .text-right { text-align: right; }
         .font-bold { font-weight: bold; }
- 
-        .col-sno { width: 7%; }
-        .col-item { width: 31%; }
+
+        .col-sno { width: 8%; }
+        .col-item { width: 27%; }
         .col-rate { width: 13%; }
         .col-discount { width: 11%; }
-        .col-discount-rate { width: 13%; }
+        .col-discount-rate { width: 15%; }
         .col-qty { width: 9%; }
-        .col-amount { width: 16%; }
- 
+        .col-amount { width: 17%; }
+
         .total-row {
-          background: #fff;
+          background: #f7f7f7;
           font-weight: bold;
         }
- 
+
         .grand-total {
-          background: #fff;
+          background: #f7f7f7;
           font-weight: bold;
         }
- 
+
         .words-section {
-          padding: 8px;
-          border-bottom: 1px solid #000;
-          text-transform: lowercase;
-          font-size: 10px;
-          min-height: 30px;
+          padding: 6px;
+          border-bottom: 1px solid #888;
+          font-size: 9px;
+          min-height: 24px;
           display: flex;
           align-items: center;
           break-inside: avoid;
           page-break-inside: avoid;
         }
- 
-        .footer-info-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
-          border-bottom: 1px solid #000;
-          min-height: 60px;
+
+        .summary-section {
+          padding: 7px 6px;
+          border-bottom: 1px solid #888;
           break-inside: avoid;
           page-break-inside: avoid;
         }
- 
-        .bank-box, .gpay-box, .upi-box {
-          padding: 8px;
-          border-right: 1px solid #000;
-          font-size: 10px;
+
+        .summary-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 5px;
+          border-top: 1px solid #888;
+          font-size: 11px;
         }
- 
-        .upi-box {
-          border-right: none;
-        }
- 
-        .footer-info-grid p {
-          margin: 3px 0;
-          font-size: 9px;
-          line-height: 1.3;
-        }
- 
-        .bottom-grid {
+
+        .invoice-footer {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          min-height: 80px;
+          grid-template-columns: 1fr 1.35fr 1fr;
+          border-bottom: 1px solid #888;
+          min-height: 42mm;
           break-inside: avoid;
           page-break-inside: avoid;
         }
- 
-        .declaration {
-          padding: 8px;
-          border-right: 1px solid #000;
-        }
- 
+
+        .declaration,
+        .payment-summary,
         .signature {
-          padding: 8px;
+          min-width: 0;
+          padding: 6px;
+          font-size: 9px;
+          overflow-wrap: anywhere;
+        }
+
+        .declaration,
+        .payment-summary {
+          border-right: 1px solid #888;
+        }
+
+        .declaration h3,
+        .payment-summary h3 {
+          margin: 0 0 5px;
+          font-size: 9px;
+        }
+
+        .payment-summary p {
+          margin: 2px 0;
+          overflow-wrap: anywhere;
+        }
+
+        .signature {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-end;
+          text-align: right;
         }
- 
+
         .for-company {
           font-weight: bold;
-          font-size: 10px;
-          margin-top: auto;
+          font-size: 9px;
         }
- 
+
         .sign-label {
           font-weight: bold;
           font-size: 9px;
         }
- 
-        .t-row {
-          margin-bottom: 5px;
-          font-size: 10px;
-        }
- 
-        .t-label {
-          font-weight: bold;
-        }
- 
-        .mt-auto { margin-top: auto; }
- 
-        .upi-qr-container {
-          margin-top: 8px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
- 
+
         .upi-qr-image {
-          width: 50px;
-          height: 50px;
+          width: 38px;
+          height: 38px;
+          margin-top: 4px;
           object-fit: contain;
-          border: 1px solid #000;
+          border: 1px solid #888;
           padding: 2px;
         }
- 
+
         @media print {
           body {
             margin: 0;
             padding: 0;
             background: white;
+            orphans: 3;
+            widows: 3;
           }
- 
+
           .invoice-print-container {
             padding: 0;
             margin: 0;
             width: 100%;
             height: auto;
             background: white;
-            page-break-after: auto;
-            break-after: auto;
           }
- 
+
           .invoice-outer-border {
             box-shadow: none;
-            border: 2px solid #000;
+            border: 1px solid #666;
           }
- 
+
+          .items-table tbody tr,
+          .items-table tfoot tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
           @page {
             size: A4 portrait;
             margin: 10mm;

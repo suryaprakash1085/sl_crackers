@@ -104,7 +104,7 @@ export default function OrdersPage() {
                 },
                 pagebreak: {
                   mode: ['css', 'legacy'],
-                  avoid: ['.items-table tbody tr', '.items-table tfoot', '.words-section', '.footer-info-grid', '.bottom-grid']
+                  avoid: ['.items-table tbody tr', '.items-table tfoot', '.words-section', '.summary-section', '.invoice-footer']
                 }
               };
 

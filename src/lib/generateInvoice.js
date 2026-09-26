@@ -268,19 +268,14 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           page-break-inside: avoid;
           break-inside: avoid;
         }
-        .items-table tbody {
-          height: 90mm;
-          vertical-align: top;
-        }
         .items-table tbody td {
           vertical-align: top;
-          box-shadow: inset 0 1px 0 #000;
         }
         .items-table thead {
           display: table-header-group;
         }
         .items-table tfoot {
-          display: table-row-group;
+          display: table-footer-group;
         }
         .col-sno { width: 8%; }
         .col-item { width: 27%; }
@@ -300,6 +295,8 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           padding: 8px;
           border-bottom: 1px solid #000;
           font-size: 10px;
+          page-break-inside: avoid;
+          break-inside: avoid;
         }
         .summary-row {
           display: flex;
@@ -393,6 +390,8 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
           display: flex;
           align-items: center;
           background-color: #f9f9f9;
+          page-break-inside: avoid;
+          break-inside: avoid;
         }
         .text-center { text-align: center; }
         .text-left { text-align: left; }
@@ -576,7 +575,13 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
     },
     pagebreak: {
       mode: ['css', 'legacy'],
-      avoid: ['.items-table tbody tr', '.payment-section', '.declaration-section']
+      avoid: [
+        '.items-table tbody tr',
+        '.payment-section',
+        '.declaration-section',
+        '.amount-in-words',
+        '.summary-section'
+      ]
     }
   };
 
