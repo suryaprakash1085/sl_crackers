@@ -388,9 +388,9 @@ export default function CheckoutPage() {
                         <span className="font-semibold">
                           ₹{
                             typeof item.price === 'number'
-                              ? (item.price * item.quantity).toFixed(2)
+                              ? (item.price ).toFixed(2)
                               : item.price
-                              ? (parseFloat(item.price.replace('₹', '')) * item.quantity).toFixed(2)
+                              ? (parseFloat(item.price.replace('₹', '')) ).toFixed(2)
                               : '0.00'
                           }
                         </span>
