@@ -62,6 +62,7 @@ async function initializeDatabase() {
         product_name VARCHAR(255) NOT NULL,
         quantity INT NOT NULL,
         price DECIMAL(10, 2) NOT NULL,
+        discount_price DECIMAL(10, 2) DEFAULT NULL,
         discount DECIMAL(5, 2) DEFAULT 0,
         FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
       )

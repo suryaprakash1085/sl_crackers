@@ -172,7 +172,14 @@ export default function Home() {
 
   const addProductToCart = (product) => {
     playProductSound();
-    addToCart({ ...product, price: getProductSalePrice(product), quantity: 1 });
+    const originalPrice = Number.parseFloat(product.price) || 0;
+    addToCart({
+      ...product,
+      originalPrice,
+      discountPrice: getProductSalePrice(product),
+      price: originalPrice,
+      quantity: 1,
+    });
     setShowCart(true);
   };
 

@@ -253,12 +253,22 @@ export default function CheckoutPage() {
     try {
       setLoading(true);
 
+      const orderItems = cart.map((item) => {
+        const originalPrice = Number.parseFloat(String(item.originalPrice ?? item.price ?? '').replace(/[₹,\\s]/g, '')) || 0;
+        const discountPrice = Number.parseFloat(String(item.discountPrice ?? item.salePrice ?? item.price ?? '').replace(/[₹,\\s]/g, '')) || 0;
+        const discountPercent = item.discountPercent ?? (originalPrice > 0
+          ? Math.max(0, ((originalPrice - discountPrice) / originalPrice) * 100)
+          : 0);
+
+        return { ...item, originalPrice, discountPrice, price: originalPrice, discountPercent };
+      });
+
       const orderData = {
         customerName: formData.name,
         phone: formData.phone,
         email: formData.email,
         address: formData.address,
-        items: cart,
+        items: orderItems,
         itemCount: cart.length,
         totalAmount: getCartTotal(),
         payments,

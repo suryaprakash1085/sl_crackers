@@ -90,14 +90,16 @@ export const generateInvoicePDF = async (orderData, invoiceNumber, orderId, { do
 
   const itemsHTML = orderData.items.map((item, index) => {
     const { originalPrice, salePrice } = getInvoiceItemPrices(item);
-    const discountPercent = 75;
+    const discountPercent = Number.isFinite(Number(item.discountPercent))
+      ? Number(item.discountPercent)
+      : originalPrice > 0 ? Math.max(0, ((originalPrice - salePrice) / originalPrice) * 100) : 0;
     const amount = (salePrice * item.quantity).toFixed(2);
 
     return `<tr style="border: 1px solid #000;">
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">${index + 1}</td>
         <td style="border: 1px solid #000; padding: 8px;">${item.name}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${originalPrice.toFixed(2)}</td>
-        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${discountPercent.toFixed(2).replace(/\.00$/, '')}%</td>
+        <td style="border: 1px solid #000; padding: 8px; text-align: center;">75%</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">₹ ${salePrice.toFixed(2)}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.quantity}</td>
         <td style="border: 1px solid #000; padding: 8px; text-align: right;">₹ ${amount}</td>

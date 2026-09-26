@@ -11,7 +11,9 @@
     "init:db": "node src/scripts/init-db.js",
     "migrate:price80": "node src/scripts/add-product-price-80.js",
     "migrate:catalog-indexes": "node src/scripts/add-catalog-indexes.js",
-    "migrate:company-upload-fields": "node src/scripts/add-company-upload-fields.js"
+    "migrate:company-upload-fields": "node src/scripts/add-company-upload-fields.js",
+    "migrate:order-id": "node src/scripts/migrate-order-id.js",
+    "migrate:order-discounts": "node src/scripts/add-missing-columns.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

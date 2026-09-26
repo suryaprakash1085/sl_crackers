@@ -40,6 +40,18 @@ async function addMissingColumns() {
       console.log('Info: Could not check/add discount column:', error.message);
     }
 
+    const [discountPriceColumns] = await connection.execute(
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME='order_items' AND COLUMN_NAME='discount_price'"
+    );
+    if (discountPriceColumns.length === 0) {
+      await connection.execute(
+        'ALTER TABLE order_items ADD COLUMN discount_price DECIMAL(10, 2) DEFAULT NULL AFTER price'
+      );
+    }
+    await connection.execute(
+      'UPDATE order_items SET discount_price = ROUND(price * (1 - COALESCE(discount, 0) / 100), 2) WHERE discount_price IS NULL'
+    );
+
     await connection.end();
     console.log('\n✓ Migration completed successfully!');
   } catch (error) {

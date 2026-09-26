@@ -28,6 +28,9 @@ export async function POST(request) {
     );
 
     const orderId = orderResult.insertId;
+    if (!orderId || Number(orderId) < 1) {
+      throw new Error('The database did not generate a valid order ID. Run the order ID migration.');
+    }
     const invoiceNumber = `invno ${String(orderId).padStart(8, '0')}`;
 
     // Update invoice number
@@ -38,28 +41,16 @@ export async function POST(request) {
 
     // Insert into order_items table
     for (const item of items) {
-      // Use price or discount to determine the item price
-      let itemPrice = 0;
-
-      if (typeof item.price === 'number') {
-        itemPrice = item.price;
-      } else if (item.price && typeof item.price === 'string') {
-        itemPrice = parseFloat(item.price.replace('₹', ''));
-      } else if (typeof item.discount === 'number') {
-        itemPrice = item.discount;
-      } else if (item.discount && typeof item.discount === 'string') {
-        itemPrice = parseFloat(item.discount.replace('₹', ''));
-      }
-
-      // Calculate discount percentage (default to 0 if not available)
-      let discountPercent = 0;
-      if (item.discountPercent !== undefined) {
-        discountPercent = item.discountPercent;
-      }
+      const price = Number.parseFloat(String(item.originalPrice ?? item.price ?? '').replace(/[₹,\s]/g, '')) || 0;
+      const salePrice = Number.parseFloat(String(item.discountPrice ?? item.salePrice ?? item.price ?? '').replace(/[₹,\s]/g, '')) || 0;
+      const suppliedDiscount = Number.parseFloat(item.discountPercent);
+      const discountPercent = Number.isFinite(suppliedDiscount)
+        ? suppliedDiscount
+        : price > 0 ? Math.max(0, ((price - salePrice) / price) * 100) : 0;
 
       await connection.execute(
-        'INSERT INTO order_items (order_id, product_id, product_name, quantity, price, discount) VALUES (?, ?, ?, ?, ?, ?)',
-        [orderId, item.id || null, item.name, item.quantity, item.price, discountPercent]
+        'INSERT INTO order_items (order_id, product_id, product_name, quantity, price, discount_price, discount) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [orderId, item.id || null, item.name, item.quantity, price, salePrice, discountPercent]
       );
     }
 
@@ -139,10 +130,16 @@ export async function PATCH(request) {
 
       // Insert updated items
       for (const item of items) {
-        const discount = item.discount || 0;
+        const price = Number.parseFloat(String(item.price ?? '').replace(/[₹,\s]/g, '')) || 0;
+        const discount = Number.parseFloat(item.discount ?? item.discountPercent) || 0;
+        const suppliedSalePrice = item.discountPrice ?? item.discount_price;
+        const salePrice = suppliedSalePrice == null
+          ? price * (1 - discount / 100)
+          : Number.parseFloat(String(suppliedSalePrice).replace(/[₹,\s]/g, '')) || 0;
+
         await connection.execute(
-          'INSERT INTO order_items (order_id, product_id, product_name, quantity, price, discount) VALUES (?, ?, ?, ?, ?, ?)',
-          [orderId, item.product_id || null, item.product_name, item.quantity, item.price, discount]
+          'INSERT INTO order_items (order_id, product_id, product_name, quantity, price, discount_price, discount) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [orderId, item.product_id || null, item.product_name, item.quantity, price, salePrice, discount]
         );
       }
 
