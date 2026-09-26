@@ -388,7 +388,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
           display: grid;
           grid-template-columns: 1fr 1.35fr 1fr;
           border-bottom: 1px solid #888;
-          min-height: 42mm;
+          min-height: 30mm;
           break-inside: avoid;
           page-break-inside: avoid;
         }
@@ -397,7 +397,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
         .payment-summary,
         .signature {
           min-width: 0;
-          padding: 6px;
+          padding: 4px;
           font-size: 9px;
           overflow-wrap: anywhere;
         }
