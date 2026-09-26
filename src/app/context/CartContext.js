@@ -125,12 +125,15 @@ export function CartProvider({ children }) {
 
   const getCartTotal = () => {
     return cart.reduce((total, item) => {
-      let price = 0;
-      if (typeof item.price === 'number') {
-        price = item.price;
-      } else if (item.price) {
-        price = parseFloat(item.price.replace('₹', ''));
-      }
+      const discountedPrice = typeof item.discountPrice === 'number'
+        ? item.discountPrice
+        : parseFloat(String(item.discountPrice || '').replace('₹', ''));
+      const regularPrice = typeof item.price === 'number'
+        ? item.price
+        : parseFloat(String(item.price || '').replace('₹', ''));
+      const price = Number.isFinite(discountedPrice)
+        ? discountedPrice
+        : Number.isFinite(regularPrice) ? regularPrice : 0;
       return total + (price * item.quantity);
     }, 0);
   };

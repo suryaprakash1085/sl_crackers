@@ -395,7 +395,48 @@ export default function CheckoutPage() {
                           }
                         </span>
                       </p>
+                       <p className="text-gray-300">
+                        Discount Price:{' '}
+                        <span className="font-semibold">
+                          ₹{
+                            (() => {
+                              const discountPrice = typeof item.discountPrice === 'number'
+                                ? item.discountPrice
+                                : parseFloat(String(item.discountPrice || '').replace('₹', ''));
+                              const regularPrice = typeof item.price === 'number'
+                                ? item.price
+                                : parseFloat(String(item.price || '').replace('₹', ''));
+                              const price = Number.isFinite(discountPrice)
+                                ? discountPrice
+                                : Number.isFinite(regularPrice) ? regularPrice : 0;
+                              return (price ).toFixed(2);
+                            })()
+                          }
+                        </span>
+                      </p>
+                     
                     </div>
+                    <div>
+                       <p className="text-gray-300">
+                        Total:{' '}
+                        <span className="font-semibold">
+                          ₹{
+                            (() => {
+                              const discountPrice = typeof item.discountPrice === 'number'
+                                ? item.discountPrice
+                                : parseFloat(String(item.discountPrice || '').replace('₹', ''));
+                              const regularPrice = typeof item.price === 'number'
+                                ? item.price
+                                : parseFloat(String(item.price || '').replace('₹', ''));
+                              const price = Number.isFinite(discountPrice)
+                                ? discountPrice
+                                : Number.isFinite(regularPrice) ? regularPrice : 0;
+                              return (price * item.quantity).toFixed(2);
+                            })()
+                          }
+                        </span>
+                      </p>
+                      </div>
                   </div>
                 ))}
 
