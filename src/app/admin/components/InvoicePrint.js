@@ -29,6 +29,11 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
   const { order, items } = orderData;
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
   const subTotal = parseFloat(order.total_amount);
+  const invoiceNumber = String(order.invoice_number || `CC/${order.id}`);
+  const invoiceNumberDigits = invoiceNumber.match(/(\d+)\s*$/);
+  const displayInvoiceNumber = invoiceNumberDigits
+    ? String(Number(invoiceNumberDigits[1]))
+    : invoiceNumber;
 
   // Calculate display order number (5-digit format starting from 11111)
   const displayOrderNumber = order.id ? String(order.id + 11110).padStart(5, '0') : '00001';
@@ -56,17 +61,19 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
     <div ref={containerRef} className="invoice-print-container">
       <div className="invoice-outer-border">
         <div className="invoice-topline">
-          <span>Invoice No: {order.invoice_number || `CC/${order.id}`}</span>
+          <span>Invoice No: {displayInvoiceNumber}</span>
           <strong>TAX INVOICE</strong>
           <span>Original Copy</span>
         </div>
 
         <div className="company-heading">
           {company?.logo && <img src={company.logo} alt="Company logo" className="logo-img" />}
-          <h1>{company?.company_name || 'Your Company Name'}</h1>
-          {company?.address && <p>{company.address}</p>}
-          <p>{[company?.email, company?.website, company?.phone_number].filter(Boolean).join(' | ')}</p>
-          {company?.gst_number && <p>GSTIN: {company.gst_number}</p>}
+          <div className="company-details">
+            <h1>{company?.company_name || 'Your Company Name'}</h1>
+            {company?.address && <p>{company.address}</p>}
+            <p>{[company?.email, company?.website, company?.phone_number].filter(Boolean).join(' | ')}</p>
+            {company?.gst_number && <p>GSTIN: {company.gst_number}</p>}
+          </div>
         </div>
 
         <div className="bill-details">
@@ -78,7 +85,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
             <p><strong>Email:</strong> {order.email}</p>
           </div>
           <div className="bill-info">
-            <div className="row"><span className="label">Invoice Number</span><span>{order.invoice_number || `CC/${order.id}`}</span></div>
+            <div className="row"><span className="label">Invoice Number</span><span>{displayInvoiceNumber}</span></div>
             <div className="row"><span className="label">Invoice Date</span><span>{new Date(order.created_at).toLocaleDateString('en-GB')}</span></div>
             <div className="row"><span className="label">Order Number</span><span>{displayOrderNumber}</span></div>
             <div className="row"><span className="label">Payment</span><span className="font-bold">{order.payment_status || 'UnPaid'}</span></div>
@@ -128,7 +135,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
             </tr>
             <tr>
               <td colSpan="6" className="text-right">Packing and Forwarding Charges</td>
-              <td className="text-right">₹ 0</td>
+              <td className="text-right">To pay</td>
             </tr>
             <tr className="grand-total">
               <td colSpan="6" className="text-right font-bold">Total Amount</td>
@@ -139,7 +146,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
 
         {/* Amount in Words */}
         <div className="words-section">
-          <strong>Amount in words:</strong>&nbsp; INR {amountToWords(subTotal)}
+          <strong>Amount in words:</strong>&nbsp; Rupees {amountToWords(subTotal)}
         </div>
 
         <div className="summary-section">
@@ -152,6 +159,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
         <div className="invoice-footer">
           <div className="declaration">
             <h3>Declaration</h3>
+            <p>All fireworks are sold as per applicable rules and regulations. Customers are requested to use fireworks safely and responsibly.</p>
           </div>
           <div className="payment-summary">
             <h3>Payment Details</h3>
@@ -213,17 +221,25 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
         }
 
         .company-heading {
+          display: flex;
+          align-items: center;
           padding: 5px 10px 7px;
-          text-align: center;
           border-bottom: 1px solid #888;
         }
 
         .company-heading .logo-img {
           display: block;
-          max-width: 42px;
-          max-height: 32px;
-          margin: 0 auto 2px;
+          width: 64px;
+          height: 52px;
+          flex: 0 0 64px;
+          margin: 0 8px 0 0;
           object-fit: contain;
+        }
+
+        .company-details {
+          flex: 1;
+          min-width: 0;
+          text-align: center;
         }
 
         .company-heading h1 {
@@ -417,6 +433,12 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
         .payment-summary p {
           margin: 2px 0;
           overflow-wrap: anywhere;
+        }
+
+        .declaration p {
+          margin: 0;
+          font-size: 8px;
+          line-height: 1.35;
         }
 
         .signature {
