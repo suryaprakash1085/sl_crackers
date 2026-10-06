@@ -3,12 +3,12 @@ import mysql from 'mysql2/promise';
 const dbConfig = {
   // host: '192.168.31.51',
   host:'localhost',
-  user: 'paradise_pk_crackers',
-  password: 'paradise_pk_crackers',
-  database: 'paradise_pk_crackers',
-// user: 'mzljrmfz_final_v2',
-// password: 'mzljrmfz_final_v2',
-// database: 'mzljrmfz_final_v2',
+  // user: 'paradise_pk_crackers',
+  // password: 'paradise_pk_crackers',
+  // database: 'paradise_pk_crackers',
+user: 'mzljrmfz_final_v2',
+password: 'mzljrmfz_final_v2',
+database: 'mzljrmfz_final_v2',
 };
 
 export const emailConfig = {
