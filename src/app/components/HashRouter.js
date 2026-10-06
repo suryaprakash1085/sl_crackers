@@ -1,9 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
+import {
+  getAdminSessionSnapshot,
+  getServerAdminSessionSnapshot,
+  subscribeToAdminSession,
+} from '@/lib/adminSession';
 import Header from './Header';
 import Footer from './Footer';
+
+function subscribeToHash(callback) {
+  window.addEventListener('hashchange', callback);
+  return () => window.removeEventListener('hashchange', callback);
+}
+
+function getHashSnapshot() {
+  return window.location.hash;
+}
+
+function getServerHashSnapshot() {
+  return '';
+}
 
 const LoginPage = dynamic(() => import('../login/page'));
 const AdminLayout = dynamic(() => import('../admin/layout'));
@@ -21,20 +40,17 @@ const GstInvoicePage = dynamic(() => import('../admin/gst-invoice/page'));
 const BlogPage = dynamic(() => import('../admin/blog/page'));
 
 export default function HashRouter({ children }) {
-  const [hash, setHash] = useState('');
-
-  useEffect(() => {
-    // Set initial hash
-    setHash(window.location.hash);
-
-    // Listen for hash changes
-    const handleHashChange = () => {
-      setHash(window.location.hash);
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  const hash = useSyncExternalStore(
+    subscribeToHash,
+    getHashSnapshot,
+    getServerHashSnapshot
+  );
+  const isAdminAuthenticated = useSyncExternalStore(
+    subscribeToAdminSession,
+    getAdminSessionSnapshot,
+    getServerAdminSessionSnapshot
+  );
+  const pathname = usePathname();
 
   // Parse hash to get route
   const route = hash.replace('#', '') || '/';
@@ -42,6 +58,10 @@ export default function HashRouter({ children }) {
   useEffect(() => {
     document.title = 'Sivakasi Mart Traders';
   }, [route]);
+
+  if (pathname.startsWith('/admin') && !hash.startsWith('#/admin')) {
+    return children;
+  }
 
   // Admin routes - check if user is authorized
   const adminRoutes = ['/admin', '/admin/dashboard', '/admin/products', '/admin/orders', '/admin/customers', '/admin/payments-info', '/admin/chit-fund', '/admin/company-info', '/admin/appearance', '/admin/colours', '/admin/gst-invoice', '/admin/blog'];
@@ -51,10 +71,9 @@ export default function HashRouter({ children }) {
   const orderCreateRoute = route === '/admin/orders/new';
 
   const isAdminRoute = adminRoutes.includes(route) || orderEditMatch || orderCreateRoute;
-  const adminUser = typeof window !== 'undefined' ? localStorage.getItem('adminUser') : null;
 
   // If admin route but not logged in, show login
-  if (isAdminRoute && !adminUser) {
+  if (isAdminRoute && !isAdminAuthenticated) {
     return <LoginPage />;
   }
 
@@ -63,7 +82,7 @@ export default function HashRouter({ children }) {
     return <LoginPage />;
   }
 
-  if (isAdminRoute && adminUser) {
+  if (isAdminRoute && isAdminAuthenticated) {
     let pageContent = <AdminDashboard />;
 
     if (route === '/admin/products') {
@@ -92,7 +111,7 @@ export default function HashRouter({ children }) {
       pageContent = <BlogPage />;
     }
 
-    return <AdminLayout>{pageContent}</AdminLayout>;
+    return <AdminLayout isAuthenticated>{pageContent}</AdminLayout>;
   }
 
   // Otherwise render regular frontend with header and footer

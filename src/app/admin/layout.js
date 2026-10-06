@@ -1,24 +1,40 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import { getPublicJson } from '@/lib/publicJson';
+import LoginPage from '../login/page';
+import {
+  getAdminSessionSnapshot,
+  getServerAdminSessionSnapshot,
+  setAdminAuthenticated,
+  subscribeToAdminSession,
+} from '@/lib/adminSession';
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout({ children, isAuthenticated: authenticatedProp }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [companyName, setCompanyName] = useState('Admin');
+  const adminSessionAuthenticated = useSyncExternalStore(
+    subscribeToAdminSession,
+    getAdminSessionSnapshot,
+    getServerAdminSessionSnapshot
+  );
+  const isAuthenticated = authenticatedProp ?? adminSessionAuthenticated;
 
   useEffect(() => {
-    fetchCompanyName();
-  }, []);
+    if (!isAuthenticated) return;
+    let isMounted = true;
+    getPublicJson('/api/company-info?fields=company_name')
+      .then((data) => {
+        if (isMounted) setCompanyName(data.company_name || 'Admin');
+      })
+      .catch((error) => {
+        console.error('Error fetching company name:', error);
+      });
 
-  const fetchCompanyName = async () => {
-    try {
-      const data = await getPublicJson('/api/company-info?fields=company_name');
-      setCompanyName(data.company_name || 'Admin');
-    } catch (error) {
-      console.error('Error fetching company name:', error);
-    }
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated]);
 
   const navItems = [
     { label: 'Dashboard', href: '/admin', icon: '📊' },
@@ -34,9 +50,11 @@ export default function AdminLayout({ children }) {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('adminUser');
-    window.location.href = '/#/admin/login';
+    setAdminAuthenticated(false);
+    window.location.hash = '/admin/login';
   };
+
+  if (!isAuthenticated) return <LoginPage />;
 
   return (
     <div className="flex h-screen bg-gray-100 print:flex-col print:h-auto">

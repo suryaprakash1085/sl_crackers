@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { setAdminAuthenticated } from '@/lib/adminSession';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -24,10 +25,8 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Store admin token/session
-        localStorage.setItem('adminUser', data.username);
-        // Redirect to admin panel using hash-based routing
-        window.location.href = '/#/admin/dashboard';
+        setAdminAuthenticated(true);
+        window.location.hash = '/admin/dashboard';
       } else {
         setError(data.error || 'Invalid username or password');
       }
