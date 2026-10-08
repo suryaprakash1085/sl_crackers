@@ -59,6 +59,10 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
 
   return (
     <div ref={containerRef} className="invoice-print-container">
+      <table className="print-frame">
+        <thead><tr><td><div className="print-space-top" /></td></tr></thead>
+        <tfoot><tr><td><div className="print-space-bottom" /></td></tr></tfoot>
+        <tbody><tr><td>
       <div className="invoice-outer-border">
         <div className="invoice-topline">
           <span>Invoice No: {displayInvoiceNumber}</span>
@@ -179,6 +183,10 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
           </div>
         </div>
       </div>
+        </td></tr></tbody>
+      </table>
+
+      <div className="print-footer">https://sivakasimart.in/</div>
 
       <style jsx>{`
         .invoice-print-container {
@@ -468,6 +476,25 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
           padding: 2px;
         }
 
+        .print-frame {
+          width: 100%;
+          border-collapse: collapse;
+          border: 0;
+        }
+        .print-frame > thead > tr > td,
+        .print-frame > tbody > tr > td,
+        .print-frame > tfoot > tr > td {
+          padding: 0;
+          border: 0;
+        }
+        .print-space-top,
+        .print-space-bottom {
+          height: 0;
+        }
+        .print-footer {
+          display: none;
+        }
+
         @media print {
           body {
             margin: 0;
@@ -477,8 +504,20 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
             widows: 3;
           }
 
+          .print-space-top { height: 10mm; }
+          .print-space-bottom { height: 16mm; }
+
+          .print-footer {
+            display: block;
+            position: fixed;
+            left: 10mm;
+            bottom: 6mm;
+            font-size: 9pt;
+            color: #444;
+          }
+
           .invoice-print-container {
-            padding: 0;
+            padding: 0 10mm;
             margin: 0;
             width: 100%;
             height: auto;
@@ -495,11 +534,13 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
             break-inside: avoid;
             page-break-inside: avoid;
           }
+        }
+      `}</style>
 
-          @page {
-            size: A4 portrait;
-            margin: 10mm;
-          }
+      <style jsx global>{`
+        @page {
+          size: A4 portrait;
+          margin: 0;
         }
       `}</style>
     </div>

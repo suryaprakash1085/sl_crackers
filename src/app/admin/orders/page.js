@@ -1,9 +1,92 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 import InvoicePrint from '../components/InvoicePrint';
 import { openWhatsAppPopup, closeWhatsAppPopup, sendOrderWhatsApp } from '@/lib/whatsappNotify';
+
+// html2pdf cannot repeat table headers or close table borders at a page end.
+// So the invoice DOM (a detached copy, never the live React tree) is split into
+// page-sized blocks: each page gets its own bordered box and table header, and
+// the totals / words / footer stay together on the last page.
+function paginateInvoice(root) {
+  const outer = root.querySelector('.invoice-outer-border');
+  const table = outer?.querySelector('.items-table');
+  if (!outer || !table || !table.tBodies[0]) return;
+
+  const rows = Array.from(table.tBodies[0].rows);
+  const count = rows.length;
+  // Capacities in rows (measured from real PDFs, each with ~1 row of safety space)
+  const CAP_FIRST = 39; // page 1 also holds the company + billing blocks
+  const CAP_MIDDLE = 47; // a full middle page
+  const CAP_LAST = 32; // last page also holds totals + words + footer
+  const MIN_LAST = 1; // rows that must stay on the last page (small = fuller pages before it)
+  const SINGLE_PAGE = 27; // everything fits on one page up to this many rows
+  const FIRST_EXTRA = CAP_MIDDLE - CAP_FIRST; // page 1 holds this many rows less than a middle page
+
+  if (count <= SINGLE_PAGE) return;
+
+  // Fewest pages that can hold everything
+  let pages = 2;
+  while (CAP_FIRST + (pages - 2) * CAP_MIDDLE + CAP_LAST < count) pages += 1;
+
+  // Rows on the last page, then spread the rest so every page before it
+  // ends with the same empty space at the bottom
+  const nonLast = pages - 1;
+  const lastRows = Math.max(MIN_LAST, count - (CAP_FIRST + (nonLast - 1) * CAP_MIDDLE));
+  const beforeLast = count - lastRows;
+  const firstRows = Math.min(CAP_FIRST, Math.max(1, Math.round((beforeLast + FIRST_EXTRA) / nonLast - FIRST_EXTRA)));
+
+  const sizes = [firstRows];
+  let remaining = beforeLast - firstRows;
+  for (let page = 1; page < nonLast; page += 1) {
+    const pagesLeft = nonLast - page;
+    const take = Math.ceil(remaining / pagesLeft);
+    sizes.push(take);
+    remaining -= take;
+  }
+  sizes.push(lastRows);
+
+  const ranges = [];
+  let start = 0;
+  sizes.forEach((size) => {
+    ranges.push([start, start + size]);
+    start += size;
+  });
+
+  const thead = table.tHead;
+  const tfoot = table.tFoot;
+  const tail = ['.words-section', '.summary-section', '.invoice-footer']
+    .map((selector) => outer.querySelector(selector))
+    .filter(Boolean);
+
+  let previousOuter = outer;
+  let lastOuter = outer;
+  let lastTable = table;
+
+  ranges.slice(1).forEach(([from, to]) => {
+    const pageOuter = outer.cloneNode(false);
+    pageOuter.style.marginTop = '3px'; // keeps this page's top border off the previous page
+    const pageTable = table.cloneNode(false);
+    if (thead) pageTable.appendChild(thead.cloneNode(true));
+    const body = document.createElement('tbody');
+    rows.slice(from, to).forEach((row) => body.appendChild(row));
+    pageTable.appendChild(body);
+    pageOuter.appendChild(pageTable);
+
+    const pageBreak = document.createElement('div');
+    pageBreak.className = 'html2pdf__page-break';
+
+    previousOuter.after(pageBreak, pageOuter);
+    previousOuter = pageOuter;
+    lastOuter = pageOuter;
+    lastTable = pageTable;
+  });
+
+  if (tfoot) lastTable.appendChild(tfoot);
+  tail.forEach((node) => lastOuter.appendChild(node));
+}
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -25,9 +108,7 @@ export default function OrdersPage() {
   const [downloadingOrderId, setDownloadingOrderId] = useState(null);
   const [downloadOrderData, setDownloadOrderData] = useState(null);
   const [printingOrderId, setPrintingOrderId] = useState(null);
-  const [printOrderData, setPrintOrderData] = useState(null);
   const invoiceRef = useRef(null);
-  const printInvoiceRef = useRef(null);
 
   // Load orders from database
   useEffect(() => {
@@ -64,126 +145,148 @@ export default function OrdersPage() {
     fetchOrders();
   };
 
- // Paste this in place of the existing handleDownloadInvoice in your Orders page.
-// The only changes are inside `options`: the pagebreak.avoid list now covers the
-// footer / summary / words blocks (not just table rows), and margin is set to
-// match the invoice's own design instead of 0, so page 2 gets the same inset
-// as page 1 instead of starting flush against the paper edge.
-
-const handleDownloadInvoice = async (orderId) => {
-  try {
-    setDownloadingOrderId(orderId);
-    // Fetch full order details including company info
+  // Builds the SAME PDF as the checkout page (repeated header on each page,
+  // closed borders, "Page x of y" footer). Used by both Download and Print.
+  const buildInvoicePdf = async (orderId) => {
     const response = await fetch(`/api/orders?id=${orderId}`);
     const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to load order');
 
-    if (response.ok) {
-      const paymentResponse = await fetch('/api/payments-info', { cache: 'no-store' });
-      const paymentMethods = paymentResponse.ok ? await paymentResponse.json() : null;
+    const paymentResponse = await fetch('/api/payments-info', { cache: 'no-store' });
+    const paymentMethods = paymentResponse.ok ? await paymentResponse.json() : null;
 
-      setDownloadOrderData({ ...data, paymentMethods });
+    // Same number format as the checkout page
+    const items = (data.items || []).map((item) => ({
+      ...item,
+      quantity: Number(item.quantity) || 0,
+      price: Number(item.price) || 0,
+      discount_price: Number(item.discount_price) || 0,
+    }));
 
-      // Give React a moment to render the hidden invoice
-      setTimeout(async () => {
-        if (invoiceRef.current) {
-          try {
-            // Dynamically import html2pdf only when needed
-            const html2pdf = (await import('html2pdf.js')).default;
+    flushSync(() => {
+      setDownloadOrderData({
+        ...data,
+        order: { ...data.order, total_amount: Number(data.order.total_amount) || 0 },
+        items,
+        paymentMethods,
+      });
+    });
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-            const filename = `Invoice-${data.order.invoice_number || orderId}.pdf`;
-            const options = {
-              margin: [5, 0, 5, 0],
-              filename: filename,
-              image: { type: 'jpeg', quality: 0.95 },
-              html2canvas: {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff',
-                logging: false
-              },
-              jsPDF: {
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4',
-                compress: true
-              },
-              pagebreak: {
-                mode: ['css', 'legacy'],
-                avoid: [
-                  '.items-table tbody tr',
-                  '.items-table tfoot',
-                  '.words-section',
-                  '.summary-section',
-                  '.invoice-footer'
-                ]
-              }
-            };
+    const element = invoiceRef.current;
+    if (!element) throw new Error('Invoice could not be rendered');
 
-            await html2pdf().set(options).from(invoiceRef.current).save();
+    // Invoice number shown on the invoice: "invno 00000011" -> "11"
+    const invoiceDigits = String(data.order.invoice_number || orderId).match(/(\d+)\s*$/);
+    const invoiceId = invoiceDigits ? String(Number(invoiceDigits[1])) : String(data.order.invoice_number || orderId);
+    const filename = `Invoice-${invoiceId}.pdf`;
 
-            // Clean up
-            setDownloadOrderData(null);
-            setDownloadingOrderId(null);
-          } catch (error) {
-            console.error('Error generating PDF:', error);
-            alert('Error generating PDF. Please try again.');
-            setDownloadOrderData(null);
-            setDownloadingOrderId(null);
+    try {
+      // Wait for logo / QR images so they appear in the PDF
+      await Promise.all(
+        Array.from(element.querySelectorAll('img')).map((img) =>
+          img.complete ? Promise.resolve() : new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; })
+        )
+      );
+
+      // html2pdf renders inside a box exactly as wide as the printable area
+      // (210mm - 10mm - 10mm = 190mm). A detached copy is sized to that width.
+      const source = element.cloneNode(true);
+      source.style.width = '190mm';
+      source.style.padding = '0';
+      source.style.margin = '0';
+
+      // Slightly tighter rows so more items fit on each page
+      const rowStyle = document.createElement('style');
+      rowStyle.textContent = '.invoice-print-container .items-table th, .invoice-print-container .items-table td { padding: 4px 3px !important; }';
+      source.appendChild(rowStyle);
+
+      paginateInvoice(source);
+
+      const html2pdf = (await import('html2pdf.js')).default;
+      const options = {
+        margin: [10, 10, 14, 10],
+        filename,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4', compress: true },
+        pagebreak: {
+          mode: ['css', 'legacy'],
+          avoid: ['.items-table tbody tr', '.items-table tfoot', '.words-section', '.summary-section', '.invoice-footer'],
+        },
+      };
+
+      const blob = await html2pdf()
+        .set(options)
+        .from(source)
+        .toPdf()
+        .get('pdf')
+        .then((pdf) => {
+          // Website + page number on every page
+          const pages = pdf.internal.getNumberOfPages();
+          for (let i = 1; i <= pages; i += 1) {
+            pdf.setPage(i);
+            pdf.setFontSize(9);
+            pdf.setTextColor(68, 68, 68);
+            pdf.text('https://sivakasimart.in/', 10, 291);
+            pdf.text(`Page ${i} of ${pages}`, 200, 291, { align: 'right' });
           }
-        }
-      }, 1000);
-    } else {
-      console.error('Failed to fetch order details for download:', data.error);
-      alert('Failed to prepare invoice for download');
+        })
+        .output('blob');
+
+      return { blob, filename };
+    } finally {
+      setDownloadOrderData(null);
+    }
+  };
+
+  const handleDownloadInvoice = async (orderId) => {
+    try {
+      setDownloadingOrderId(orderId);
+      const { blob, filename } = await buildInvoicePdf(orderId);
+
+      const downloadUrl = URL.createObjectURL(blob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = downloadUrl;
+      downloadLink.download = filename;
+      downloadLink.click();
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Error generating PDF. Please try again.');
+    } finally {
       setDownloadingOrderId(null);
     }
-  } catch (error) {
-    console.error('Error downloading invoice:', error);
-    alert('Error occurred while downloading invoice');
-    setDownloadingOrderId(null);
-  }
-};
+  };
 
+  // Print = the same PDF as download, opened in the print dialog
   const handlePrintInvoice = async (orderId) => {
     try {
       setPrintingOrderId(orderId);
-      // Fetch full order details including company info
-      const response = await fetch(`/api/orders?id=${orderId}`);
-      const data = await response.json();
+      const { blob } = await buildInvoicePdf(orderId);
+      const url = URL.createObjectURL(blob);
 
-      if (response.ok) {
-        const paymentResponse = await fetch('/api/payments-info', { cache: 'no-store' });
-        const paymentMethods = paymentResponse.ok ? await paymentResponse.json() : null;
-
-        setPrintOrderData({ ...data, paymentMethods });
-
-        // Give React a moment to render the hidden invoice
+      const frame = document.createElement('iframe');
+      frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+      frame.src = url;
+      frame.onload = () => {
+        try {
+          frame.contentWindow.focus();
+          frame.contentWindow.print();
+        } catch (printError) {
+          // Browser cannot print inside the frame: open the PDF in a new tab instead
+          window.open(url, '_blank');
+        }
         setTimeout(() => {
-          if (printInvoiceRef.current) {
-            try {
-              window.print();
-              // Reset after print dialog closes
-              setTimeout(() => {
-                setPrintOrderData(null);
-                setPrintingOrderId(null);
-              }, 500);
-            } catch (error) {
-              console.error('Error printing invoice:', error);
-              alert('Error printing invoice. Please try again.');
-              setPrintOrderData(null);
-              setPrintingOrderId(null);
-            }
-          }
-        }, 500);
-      } else {
-        console.error('Failed to fetch order details for print:', data.error);
-        alert('Failed to prepare invoice for printing');
-        setPrintingOrderId(null);
-      }
+          frame.remove();
+          URL.revokeObjectURL(url);
+        }, 60000);
+      };
+      document.body.appendChild(frame);
     } catch (error) {
-      console.error('Error preparing invoice for print:', error);
-      alert('Error occurred while preparing invoice for printing');
+      console.error('Error printing invoice:', error);
+      alert('Error preparing invoice for printing. Please try again.');
+    } finally {
       setPrintingOrderId(null);
     }
   };
@@ -468,7 +571,7 @@ const handleDownloadInvoice = async (orderId) => {
       />
 
       {/* Hidden Invoice for downloading */}
-      <div className="hidden-invoice-render">
+      <div style={{ position: 'fixed', top: 0, left: 0, visibility: 'hidden', pointerEvents: 'none', width: '210mm', zIndex: -1 }}>
         {downloadOrderData && (
           <InvoicePrint
             containerRef={invoiceRef}
@@ -478,21 +581,6 @@ const handleDownloadInvoice = async (orderId) => {
             }}
             company={downloadOrderData.company}
             paymentMethods={downloadOrderData.paymentMethods}
-          />
-        )}
-      </div>
-
-      {/* Hidden Invoice for printing */}
-      <div className="hidden-print-invoice-render">
-        {printOrderData && (
-          <InvoicePrint
-            containerRef={printInvoiceRef}
-            orderData={{
-              order: printOrderData.order,
-              items: printOrderData.items
-            }}
-            company={printOrderData.company}
-            paymentMethods={printOrderData.paymentMethods}
           />
         )}
       </div>
@@ -538,30 +626,6 @@ const handleDownloadInvoice = async (orderId) => {
 
         .create-order-button:hover {
           background: #1d4ed8;
-        }
-
-        .hidden-invoice-render {
-          position: fixed;
-          visibility: hidden;
-          pointer-events: none;
-          width: 210mm;
-          z-index: -1;
-        }
-
-        .hidden-print-invoice-render {
-          display: none;
-        }
-
-        @media print {
-          .hidden-print-invoice-render {
-            display: block;
-          }
-
-          .orders-page-header,
-          .bg-white,
-          .orders-toolbar {
-            display: none !important;
-          }
         }
 
         .action-buttons {

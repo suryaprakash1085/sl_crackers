@@ -94,7 +94,7 @@ export default function Footer() {
           <p><strong>Address:</strong><br />{companyInfo.address || 'Contact us for address details.'}</p>
           <p><strong>email:</strong><br />{companyInfo.email || 'Email not configured'}</p>
           <p><strong>phones:</strong><br />{companyInfo.phone_number || 'Phone not configured'}</p>
-          <p><strong>Working Hours:</strong><br />Mon - Sun / 6:00 AM - 12:00 AM</p>
+          {/* <p><strong>Working Hours:</strong><br />Mon - Sun / 6:00 AM - 12:00 AM</p> */}
         </div>
 
         <nav className={styles.footerLinks} aria-label="Footer links">
