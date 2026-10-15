@@ -393,7 +393,7 @@ export default function CheckoutPage() {
     }
 
     // Validate minimum order amount
-    const minimumOrder = formData.state === 'Tamil Nadu' ? 3000 : 5000;
+    const minimumOrder = formData.state === 'Tamil Nadu' ? 3500 : 5500;
     if (cartTotal < minimumOrder) {
       scrollToCustomerDetails();
       showAlert(`Minimum order amount is ₹${minimumOrder} for ${formData.state}. Current total: ₹${cartTotal.toFixed(2)}`, 'warning');
@@ -688,8 +688,8 @@ export default function CheckoutPage() {
                     className="w-full border border-gray-600 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:border-yellow-500"
                   >
                     <option value="">Select your state</option>
-                    <option value="Tamil Nadu">Tamil Nadu (Min: ₹3000)</option>
-                    <option value="Other">Other States (Min: ₹5000)</option>
+                    <option value="Tamil Nadu">Tamil Nadu (Min: ₹3500)</option>
+                    <option value="Other">Other States (Min: ₹5500)</option>
                   </select>
                 </div>
                 <div>
@@ -755,7 +755,7 @@ export default function CheckoutPage() {
             <div className="bg-yellow-900 border-l-4 p-4 rounded" style={{ borderLeftColor: colors.goldAccent }}>
               <h3 className="font-bold mb-2" style={{ color: colors.goldAccent }}>Important Notes</h3>
               <ul className="text-sm text-gray-300 space-y-1">
-                <li>• Minimum Order: ₹3000 (TamilNadu), ₹5000 (Other States)</li>
+                <li>• Minimum Order: ₹3500 (TamilNadu), ₹5500 (Other States)</li>
                 {/* <li>• 50% Discount on bulk orders</li> */}
                 <li>• Payment required before delivery</li>
               </ul>
